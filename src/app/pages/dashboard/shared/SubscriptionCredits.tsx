@@ -299,7 +299,7 @@ export default function SubscriptionCredits() {
             <h1 className="text-2xl font-bold text-[#111111]">
               Subscription & Credits
             </h1>
-            <p className="mt-1 text-sm text-[#4a4a4a]">
+            <p className="mt-1 text-md text-[#4a4a4a]">
               Manage your subscription plan and credit balance
             </p>
           </div>
@@ -389,7 +389,7 @@ export default function SubscriptionCredits() {
                 {visibleUsageMetrics.length > 0 ? visibleUsageMetrics.map((metric) => (
                   <div key={metric.label} className="rounded-xl bg-white p-4 border border-[#f2c9a7]/50">
                     <div className="flex items-center justify-between gap-3 mb-2">
-                      <span className="text-xs font-semibold text-[#4a4a4a]">
+                      <span className="text-md font-semibold text-[#4a4a4a]">
                         {metric.label}
                       </span>
                       <span className="text-sm font-bold text-[#111111]">
@@ -404,7 +404,7 @@ export default function SubscriptionCredits() {
                         className="h-full bg-gradient-to-r from-[#F24C20] to-orange-600"
                       />
                     </div>
-                    <p className="text-[11px] mt-1.5 text-[#4a4a4a]">
+                    <p className="text-[14px] mt-1.5 text-[#4a4a4a]">
                       {metric.remaining} remaining
                     </p>
                   </div>

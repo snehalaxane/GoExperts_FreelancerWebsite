@@ -152,7 +152,7 @@ export default function ExploreIdeasPage() {
                 <Rocket className="w-3.5 h-3.5" />
                 Venture Ecosystem
               </div>
-              <h1 className="text-5xl md:text-7xl lg:text-7xl font-black mb-8 tracking-tighter leading-[1.05] uppercase">
+              <h1 className="text-3xl md:text-3xl lg:text-5xl font-black mb-8 tracking-tighter leading-[1.05] uppercase">
                 Explore <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F24C20] to-orange-400">Startup Ideas</span>
               </h1>
@@ -203,7 +203,7 @@ export default function ExploreIdeasPage() {
                        
                        <div className="p-10 pb-0 relative z-10">
                           <div className="flex items-center justify-between mb-10">
-                             <div className={`px-4 py-1.5 text-[#F24C20] text-[9px] font-black uppercase tracking-[0.2em] rounded-full ${isDarkMode ? 'bg-neutral-900 border border-white/10' : 'bg-white border border-[#FFE0C2]'}`}>
+                             <div className={`px-2 py-2.5 text-[#F24C20] text-[9px] font-black uppercase tracking-[0.2em] rounded-full ${isDarkMode ? 'bg-neutral-900 border border-white/10' : 'bg-white border border-[#FFE0C2]'}`}>
                                 Spotlight Submission
                              </div>
                              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
@@ -231,7 +231,7 @@ export default function ExploreIdeasPage() {
 
                           <button 
                             onClick={() => handleDeepDiveClick(ideas[0])}
-                            className="group/btn relative flex items-center justify-center gap-4 w-full py-5 bg-[#F24C20] text-white rounded-[1.75rem] font-black shadow-2xl shadow-[#F24C20]/30 hover:bg-orange-600 transition-all text-xs uppercase tracking-[0.2em] overflow-hidden"
+                            className="group/btn relative flex items-center justify-center gap-4 w-full py-4 bg-[#F24C20] text-white rounded-[1.75rem] font-black shadow-2xl shadow-[#F24C20]/30 hover:bg-orange-600 transition-all text-xs uppercase tracking-[0.2em] overflow-hidden"
                           >
                              <span className="relative z-10">Secure Data Access</span>
                              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform duration-500" />
@@ -329,17 +329,17 @@ export default function ExploreIdeasPage() {
                              {getCategoryName(idea)}
                            </span>
                            {(isOwner || isUnlocked) ? (
-                              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded-lg self-start flex items-center gap-1.5 animate-in fade-in slide-in-from-left-2 duration-700">
+                              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[12px] font-black uppercase tracking-widest rounded-lg self-start flex items-center gap-1.5 animate-in fade-in slide-in-from-left-2 duration-700">
                                  <ShieldCheck className="w-3 h-3" />
                                  {isOwner ? 'Your Concept' : 'Unlocked'}
                               </span>
                            ) : (
-                              <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg self-start ${isDarkMode ? 'bg-white/5 border border-white/10 text-neutral-400' : 'bg-white border border-[#FFE0C2] text-[#7a5a49]'}`}>
+                              <span className={`px-3 py-1 text-[12px] font-black uppercase tracking-widest rounded-lg self-start ${isDarkMode ? 'bg-white/5 border border-white/10 text-neutral-400' : 'bg-white border border-[#FFE0C2] text-[#7a5a49]'}`}>
                                 {idea.stage || 'Market MVP'}
                               </span>
                            )}
                         </div>
-                        <button className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black transition-all ${isDarkMode ? 'bg-neutral-900 border border-white/10 text-white hover:bg-neutral-800' : 'bg-white border border-[#FFE0C2] text-[#2b160e] hover:bg-white'}`}>
+                        <button className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-black transition-all ${isDarkMode ? 'bg-neutral-900 border border-white/10 text-white hover:bg-neutral-800' : 'bg-white border border-[#FFE0C2] text-[#2b160e] hover:bg-white'}`}>
                            <Heart className="w-3.5 h-3.5" /> Save
                         </button>
                       </div>
@@ -360,7 +360,7 @@ export default function ExploreIdeasPage() {
                          ].map((stat, i) => (
                            <div key={i} className={`rounded-2xl p-4 text-center ${isDarkMode ? 'bg-white/5 border border-white/5' : 'bg-white border border-[#FFE0C2]'}`}>
                               <div className={`text-lg font-black ${isDarkMode ? stat.color : stat.label === 'Contacts' ? 'text-[#F24C20]' : 'text-[#1f120d]'}`}>{stat.value}</div>
-                              <div className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${isDarkMode ? 'text-slate-500' : 'text-[#7a5a49]'}`}>{stat.label}</div>
+                              <div className={`text-[12px] font-bold uppercase tracking-widest mt-0.5 ${isDarkMode ? 'text-slate-500' : 'text-[#7a5a49]'}`}>{stat.label}</div>
                            </div>
                          ))}
                       </div>
@@ -368,7 +368,7 @@ export default function ExploreIdeasPage() {
                       {/* Specialist Badges */}
                       <div className="flex flex-wrap gap-2 mb-8">
                          {(idea.neededRoles || ['Product Designer', 'Growth Marketer', 'Industry Advisor']).slice(0, 3).map((role: string, i: number) => (
-                           <span key={i} className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-tighter ${isDarkMode ? 'bg-neutral-900 border border-neutral-800 text-slate-300' : 'bg-white border border-[#FFE0C2] text-[#5f4a3f]'}`}>
+                           <span key={i} className={`px-3 py-1.5 rounded-xl text-[12px] font-black uppercase tracking-tighter ${isDarkMode ? 'bg-neutral-900 border border-neutral-800 text-slate-300' : 'bg-white border border-[#FFE0C2] text-[#5f4a3f]'}`}>
                               {role}
                            </span>
                          ))}
@@ -379,7 +379,7 @@ export default function ExploreIdeasPage() {
                       <div className="flex items-center justify-between mt-6">
                          <div className="flex flex-col">
                             <span className={`text-sm font-black leading-none mb-1 text-[#1f120d]`}>{idea.creator?.full_name || 'Anonymous Founder'}</span>
-                            <span className={`text-[10px] font-bold uppercase ${isDarkMode ? 'text-slate-500' : 'text-[#7a5a49]'}`}>Bengaluru, India • <span className="text-emerald-500 italic lowercase tracking-tight">online now</span></span>
+                            <span className={`text-[13px] font-bold uppercase ${isDarkMode ? 'text-slate-500' : 'text-[#7a5a49]'}`}>Bengaluru, India • <span className="text-emerald-500 italic lowercase tracking-tight">online now</span></span>
                          </div>
                          <button 
                             onClick={() => handleDeepDiveClick(idea)}

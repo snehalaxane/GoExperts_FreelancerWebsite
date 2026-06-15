@@ -285,10 +285,10 @@ export default function Messages() {
         animate={{ opacity: 1, y: 0 }}
         className={`${showChatArea ? 'hidden md:block' : 'block'}`}
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-[#111111]">
+        <h1 className="text-2xl md:text-2xl font-bold text-[#111111]">
           Messages
         </h1>
-        <p className="mt-1 md:mt-2 text-sm text-[#4a4a4a]">
+        <p className="mt-1 md:mt-2 text-md text-[#4a4a4a]">
           Communicate with clients and freelancers
         </p>
       </motion.div>

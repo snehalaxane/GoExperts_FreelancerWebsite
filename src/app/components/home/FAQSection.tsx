@@ -49,9 +49,10 @@ export default function FAQSection() {
     return faqs.filter(f => f.category === activeTab).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
   }, [faqs, activeTab]);
 
-  // Divide into 2 columns
-  const firstCol = filteredFaqs.filter((_, i) => i % 2 === 0);
-  const secondCol = filteredFaqs.filter((_, i) => i % 2 !== 0);
+  // Divide into 3 columns
+  const firstCol = filteredFaqs.filter((_, i) => i % 3 === 0);
+  const secondCol = filteredFaqs.filter((_, i) => i % 3 === 1);
+  const thirdCol = filteredFaqs.filter((_, i) => i % 3 === 2);
 
   const getTabIcon = (cat: string) => {
     switch (cat) {
@@ -79,20 +80,20 @@ export default function FAQSection() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/20 text-[#F24C20] mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/20 text-[#F24C20] mb-4">
             <HelpCircle className="w-4 h-4" />
             <span className="text-sm font-bold tracking-wider uppercase">Quick Help</span>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-5xl font-black mb-2">
             <span className="text-foreground">Questions? </span>
-            <span className="bg-gradient-to-r from-[#F24C20] to-orange-500 bg-clip-text text-transparent italic">
+            <span className="bg-gradient-to-r from-[#F24C20] to-orange-500 bg-clip-text text-transparent">
               Answered.
             </span>
           </h2>
         </motion.div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -108,8 +109,8 @@ export default function FAQSection() {
           ))}
         </div>
 
-        {/* FAQ Grid - 2 Sections */}
-        <div className="grid lg:grid-cols-2 gap-6 items-start">
+        {/* FAQ Grid - 3 Sections */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           {/* Column 1 */}
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">
@@ -129,6 +130,21 @@ export default function FAQSection() {
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">
               {secondCol.map((faq, idx) => (
+                <FAQItem
+                  key={faq._id}
+                  faq={faq}
+                  isOpen={openId === faq._id}
+                  onToggle={() => setOpenId(openId === faq._id ? null : faq._id)}
+                  index={idx}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Column 3 */}
+          <div className="space-y-6">
+            <AnimatePresence mode="popLayout">
+              {thirdCol.map((faq, idx) => (
                 <FAQItem
                   key={faq._id}
                   faq={faq}
@@ -164,10 +180,10 @@ const FAQItem = forwardRef(({ faq, isOpen, onToggle, index }: { faq: FAQ, isOpen
     >
       <button
         onClick={onToggle}
-        className="w-full p-8 text-left group"
+        className="w-full p-6 text-left group"
       >
         <div className="flex items-center justify-between gap-6">
-          <h3 className={`text-xl font-bold transition-colors ${isOpen ? 'text-[#F24C20]' : 'text-foreground'}`}>
+          <h3 className={`text-md transition-colors ${isOpen ? 'text-[#F24C20]' : 'text-foreground'}`}>
             {faq.question}
           </h3>
           <div className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${isOpen ? 'bg-[#F24C20] border-[#F24C20] text-white rotate-180' : 'bg-[#FFEAD4] border-[#FFE0C2] text-foreground'
@@ -181,7 +197,7 @@ const FAQItem = forwardRef(({ faq, isOpen, onToggle, index }: { faq: FAQ, isOpen
           animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
           className="overflow-hidden"
         >
-          <div className="pt-8 text-neutral-500 text-lg leading-relaxed whitespace-pre-wrap">
+          <div className="pt-2 text-gray-700 text-md leading-relaxed whitespace-pre-wrap">
             <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
           </div>
         </motion.div>

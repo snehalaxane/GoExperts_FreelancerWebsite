@@ -284,7 +284,7 @@ export default function Wallet() {
   return (
     <div className="space-y-6 pb-20 text-[#111111]">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-[#111111]">
+        <h1 className="text-2xl font-bold text-[#111111]">
           Wallet & Earnings
         </h1>
         <p className="mt-2 text-[#4a4a4a]">
@@ -533,9 +533,9 @@ export default function Wallet() {
                   </>
                 ) : (
                   <div className="md:col-span-2">
-                    <label className="block text-xs text-[#4a4a4a] font-bold mb-2">UPI ID</label>
+                    <label className="block text-sm text-[#4a4a4a] font-bold mb-2">UPI ID</label>
                     <input type="text" value={upiId} onChange={e => setUpiId(e.target.value)}
-                      className="w-full bg-transparent border-b border-[#f2c9a7] py-2 outline-none text-2xl font-bold tracking-tight text-[#111111] placeholder:text-[#6b625b] focus:border-[#F24C20] transition-colors"
+                      className="w-full bg-transparent border-b border-[#f2c9a7] py-2 outline-none text-md font-semibold tracking-tight text-[#111111] placeholder:text-[#6b625b] focus:border-[#F24C20] transition-colors"
                       placeholder="username@upi" />
                   </div>
                 )}
@@ -544,11 +544,11 @@ export default function Wallet() {
 
             <div className="flex flex-col md:flex-row items-end gap-6">
               <div className="flex-1 w-full">
-                <label className="block text-xs text-[#4a4a4a] font-bold mb-2">Enter Amount to Withdraw</label>
+                <label className="block text-sm text-[#4a4a4a] font-bold mb-2">Enter Amount to Withdraw</label>
                 <div className="relative">
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-bold text-[#F24C20]">₹</span>
                   <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
-                    className="w-full bg-transparent border-b border-[#f2c9a7] pl-6 py-4 text-4xl font-black outline-none text-[#111111] placeholder:text-[#6b625b] focus:border-[#F24C20] transition-colors"
+                    className="w-full bg-transparent border-b border-[#f2c9a7] pl-6 py-4 text-xl font-black outline-none text-[#111111] placeholder:text-[#6b625b] focus:border-[#F24C20] transition-colors"
                     placeholder="00.00" />
                 </div>
                 <div className="text-[10px] text-[#4a4a4a] mt-2 font-bold uppercase tracking-widest flex justify-between">
@@ -559,7 +559,7 @@ export default function Wallet() {
               <button
                 onClick={handleWithdraw}
                 disabled={submitting || !withdrawAmount || Number(withdrawAmount) < minWithdrawal}
-                className="w-full md:w-auto px-12 py-5 bg-[#F24C20] hover:bg-orange-600 text-white rounded-2xl font-black text-lg transition-all shadow-xl shadow-orange-500/20 disabled:opacity-50 disabled:grayscale"
+                className="w-full md:w-auto px-3 py-3 bg-[#F24C20] hover:bg-orange-600 text-white rounded-2xl font-black text-lg transition-all shadow-xl shadow-orange-500/20 disabled:opacity-50 disabled:grayscale"
               >
                 {submitting ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'Confirm Withdrawal'}
               </button>

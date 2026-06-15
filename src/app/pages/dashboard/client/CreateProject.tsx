@@ -13,7 +13,8 @@ import {
   Loader2,
   Search,
   ShieldAlert,
-  Clock
+  Clock,
+  ChevronDown
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '@/app/utils/api';
@@ -43,6 +44,7 @@ export default function CreateProject() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const steps = [
     { id: 1, title: 'Project Details', icon: FileText },
@@ -356,19 +358,46 @@ export default function CreateProject() {
               <label className={`block text-xs font-medium mb-1.5 ${isDarkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
                 Category *
               </label>
-              <select
-                value={projectData.category}
-                onChange={(e) => setProjectData({ ...projectData, category: e.target.value })}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm ${isDarkMode
-                    ? 'bg-neutral-800/50 border-neutral-700 text-white'
-                    : 'bg-white border-neutral-300 text-neutral-900'
-                  } outline-none focus:border-[#F24C20] transition-colors`}
-              >
-                <option value="">Select a category</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                  className={`w-full px-4 py-2.5 rounded-xl border text-sm text-left flex justify-between items-center ${isDarkMode
+                      ? 'bg-neutral-800/50 border-neutral-700 text-white'
+                      : 'bg-white border-neutral-300 text-neutral-900'
+                    } outline-none focus:border-[#F24C20] transition-colors`}
+                >
+                  <span className={!projectData.category ? "text-neutral-400" : (isDarkMode ? "text-neutral-300" : "text-neutral-900")}>
+                    {selectedCategory ? selectedCategory.name : "Select a category"}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 opacity-50 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isCategoryOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsCategoryOpen(false)} />
+                    <div className={`absolute left-0 right-0 top-full mt-2 z-20 max-h-60 overflow-y-auto rounded-xl border shadow-lg py-1 ${
+                      isDarkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-neutral-200'
+                    }`}>
+                      {categories.map((cat) => (
+                        <div
+                          key={cat._id}
+                          onClick={() => {
+                            setProjectData({ ...projectData, category: getCategoryId(cat) });
+                            setIsCategoryOpen(false);
+                          }}
+                          className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                            projectData.category === getCategoryId(cat)
+                              ? (isDarkMode ? 'bg-[#F24C20]/20 text-[#F24C20]' : 'bg-[#F24C20]/10 text-[#F24C20]')
+                              : (isDarkMode ? 'hover:bg-neutral-700 text-white' : 'hover:bg-neutral-100 text-neutral-900')
+                          }`}
+                        >
+                          {cat.name}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <div>
@@ -530,7 +559,7 @@ export default function CreateProject() {
                       }`}
                     >
                       <div className="font-bold flex items-center justify-between">
-                         <span className={projectData.experienceLevel === level.label ? 'text-[#044071]' : isDarkMode ? 'text-white' : 'text-neutral-900'}>
+                         <span className={projectData.experienceLevel === level.label ? 'text-[#044071]' : isDarkMode ? 'text-gray-600' : 'text-neutral-900'}>
                            {level.label}
                          </span>
                          {projectData.experienceLevel === level.label && <CheckCircle className="w-5 h-5 text-[#044071]" />}
@@ -560,7 +589,7 @@ export default function CreateProject() {
                   >
                     <div className={`font-medium ${projectData.duration === duration
                         ? 'text-[#F24C20]'
-                        : isDarkMode ? 'text-white' : 'text-neutral-900'
+                        : isDarkMode ? 'text-neutral-400' : 'text-neutral-900'
                       }`}>
                       {duration}
                     </div>
@@ -573,7 +602,7 @@ export default function CreateProject() {
               <h4 className={`font-semibold mb-1.5 text-sm ${isDarkMode ? 'text-blue-400' : 'text-blue-900'}`}>
                 Budget Tips
               </h4>
-              <ul className={`text-xs space-y-1 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+              <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-blue-500' : 'text-blue-800'}`}>
                 <li>• Research market rates for similar projects</li>
                 <li>• Consider the complexity and scope of work</li>
                 <li>• Be realistic and competitive with your budget</li>
@@ -779,7 +808,7 @@ export default function CreateProject() {
               <h4 className={`font-semibold mb-1.5 text-sm ${isDarkMode ? 'text-green-400' : 'text-green-900'}`}>
                 Ready to Publish?
               </h4>
-              <p className={`text-sm ${isDarkMode ? 'text-green-300' : 'text-green-800'}`}>
+              <p className={`text-sm ${isDarkMode ? 'text-green-600' : 'text-green-800'}`}>
                 Once published, your project will be visible to all freelancers. You'll start receiving proposals within 24 hours.
               </p>
             </div>

@@ -53,7 +53,7 @@ export default function TestimonialsSection() {
   return (
     <section
       ref={ref}
-      className="relative py-18 overflow-hidden"
+      className="relative py-8 overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, var(--background) 0%, var(--secondary) 50%, var(--background) 100%)',
       }}
@@ -67,13 +67,13 @@ export default function TestimonialsSection() {
         transition={{ duration: 1 }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-10"
         >
           <motion.div
             initial={{ scale: 0 }}
@@ -86,7 +86,7 @@ export default function TestimonialsSection() {
             </div>
           </motion.div>
 
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="text-foreground">Loved by </span>
             <span className="text-[#F24C20]">Thousands</span>
           </h2>
@@ -116,7 +116,7 @@ export default function TestimonialsSection() {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="absolute top-8 left-8"
                 >
-                  <Quote className="w-20 h-20 text-[#F24C20]/20" />
+                  <Quote className="w-10 h-15 text-[#F24C20]/20" />
                 </motion.div>
 
                 {/* Background Glow */}
@@ -149,7 +149,7 @@ export default function TestimonialsSection() {
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ delay: 0.4 + i * 0.1, type: 'spring' }}
                       >
-                        <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+                        <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
                       </motion.div>
                     ))}
                   </motion.div>
@@ -159,7 +159,7 @@ export default function TestimonialsSection() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-2xl md:text-3xl text-foreground font-medium leading-relaxed mb-12 text-center max-w-4xl mx-auto"
+                    className="text-2xl md:text-xl text-foreground font-medium leading-relaxed mb-8 text-center max-w-3xl mx-auto"
                   >
                     &ldquo;{activeTestimonial.text}&rdquo;
                   </motion.p>
@@ -177,7 +177,7 @@ export default function TestimonialsSection() {
                       transition={{ duration: 0.5 }}
                       className="relative"
                     >
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#F24C20] to-orange-600 flex items-center justify-center text-5xl shadow-2xl shadow-[#F24C20]/50 border-4 border-white">
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#F24C20] to-orange-600 flex items-center justify-center text-5xl shadow-2xl shadow-[#F24C20]/50 border-4 border-white">
                         {activeTestimonial.avatar}
                       </div>
 
@@ -197,7 +197,7 @@ export default function TestimonialsSection() {
 
                     {/* Name & Role */}
                     <div className="text-center">
-                      <h4 className="text-2xl font-bold text-foreground mb-1">
+                      <h4 className="text-xl font-bold text-foreground mb-1">
                         {activeTestimonial.name}
                       </h4>
                       <p className="text-neutral-500 text-lg">{activeTestimonial.role}</p>
@@ -209,7 +209,7 @@ export default function TestimonialsSection() {
           </AnimatePresence>
 
           {/* Navigation Arrows */}
-          <div className="flex items-center justify-center gap-4 mt-12">
+          <div className="flex items-center justify-center gap-4 mt-6">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -254,7 +254,7 @@ export default function TestimonialsSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10"
         >
           {testimonials.map((testimonial, index) => (
             <motion.button

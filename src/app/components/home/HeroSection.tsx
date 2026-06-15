@@ -163,7 +163,7 @@ export default function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative pt-30 pb-20 md:pt-0 md:pb-0 min-h-[auto] md:min-h-screen flex items-center justify-center overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, var(--background) 0%, var(--secondary) 55%, var(--muted) 100%)',
       }}
@@ -184,7 +184,7 @@ export default function HeroSection() {
       <div className="absolute inset-0">
         {/* Primary Color Glow */}
         <motion.div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-20"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] md:w-[800px] md:h-[800px] rounded-full opacity-20"
           style={{
             background: 'radial-gradient(circle, #F24C20 0%, transparent 70%)',
           }}
@@ -245,26 +245,26 @@ export default function HeroSection() {
         </motion.div>
       ))}
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-32 text-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-2 md:py-32 text-center">
         {/* Badge */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/30 mb-8 backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/30 backdrop-blur-sm"
         >
           <div className="w-2 h-2 bg-[#F24C20] rounded-full animate-pulse" />
           <span className="text-sm font-medium text-neutral-600">
             Working With You..For You...
           </span>
-        </motion.div>
+        </motion.div> */}
 
         {/* Main Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4 }}
-          className="text-[42px] sm:text-5xl md:text-8xl font-bold mb-8 leading-tight tracking-tight"
+          className="text-3xl sm:text-[42px] md:text-5xl font-bold mb-4 leading-tight tracking-tight px-2 md:px-0"
         >
           <span className="block text-foreground mb-2">
             {activeBanner.title.split(' ').slice(0, -1).join(' ')}{' '}
@@ -294,7 +294,7 @@ export default function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.8 }}
-          className="text-xl md:text-2xl text-neutral-500 mb-16 max-w-4xl mx-auto"
+          className="text-sm md:text-base text-neutral-500 mb-4 max-w-4xl mx-auto px-4 md:px-0"
         >
           {activeBanner.subtitle}
         </motion.div>
@@ -312,17 +312,17 @@ export default function HeroSection() {
 
             <form
               onSubmit={handleSearch}
-              className="relative flex flex-col md:flex-row items-stretch gap-3 p-3 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#FFE0C2] shadow-xl shadow-orange-500/5"
+              className="relative flex flex-col md:flex-row items-stretch gap-2 md:gap-1 p-2 md:p-1 bg-white/95 backdrop-blur-xl rounded-3xl border border-[#FFE0C2] shadow-xl shadow-orange-500/5"
             >
               {/* Type Selector */}
               {showBothSearchModes && (
-                <div className="flex gap-2 p-1.5 bg-black/40 rounded-2xl">
+                <div className="flex gap-1 md:gap-2 p-1 bg-black/40 rounded-2xl w-full md:w-auto">
                   <button
                     type="button"
                     onClick={() => setSearchType('sellers')}
-                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${searchType === 'sellers'
+                    className={`flex-1 md:flex-none px-2 py-2.5 md:px-2 md:py-2 rounded-xl text-sm md:text-base font-medium transition-all duration-300 ${searchType === 'sellers'
                       ? 'bg-[#044071] text-white shadow-lg shadow-[#044071]/50'
-                      : 'text-neutral-500 hover:text-neutral-900'
+                      : 'text-neutral-300 md:text-neutral-500 hover:text-white md:hover:text-neutral-900'
                       }`}
                   >
                     Find Talent
@@ -330,9 +330,9 @@ export default function HeroSection() {
                   <button
                     type="button"
                     onClick={() => setSearchType('buyers')}
-                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${searchType === 'buyers'
+                    className={`flex-1 md:flex-none px-2 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-medium transition-all duration-300 ${searchType === 'buyers'
                       ? 'bg-[#044071] text-white shadow-lg shadow-[#044071]/50'
-                      : 'text-neutral-500 hover:text-neutral-900'
+                      : 'text-neutral-300 md:text-neutral-500 hover:text-white md:hover:text-neutral-900'
                       }`}
                   >
                     Find Projects
@@ -341,7 +341,7 @@ export default function HeroSection() {
               )}
 
               {/* Search Input */}
-              <div className="flex-1 flex items-center px-6">
+              <div className="flex-1 flex items-center px-4 py-3 md:py-0 md:px-2">
                 <input
                   type="text"
                   value={searchTerm}
@@ -349,7 +349,7 @@ export default function HeroSection() {
                   placeholder={
                     searchPlaceholder
                   }
-                  className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-neutral-500 text-lg"
+                  className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-neutral-500 text-sm md:text-base min-w-0"
                 />
               </div>
 
@@ -358,7 +358,7 @@ export default function HeroSection() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="px-8 py-3 bg-[#044071] hover:bg-[#055a99] text-white rounded-2xl font-semibold transition-all duration-300 flex items-center gap-2 group"
+                className="w-full md:w-auto justify-center px-6 py-3 md:py-2 bg-[#044071] hover:bg-[#055a99] text-white rounded-2xl font-semibold transition-all duration-300 flex items-center gap-2 group"
               >
                 <span>{searchButtonLabel}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -371,25 +371,24 @@ export default function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2 }}
-            className="flex flex-wrap items-center justify-center gap-3 mt-6"
+            className="mt-2 w-full overflow-hidden"
           >
-            <span className="text-sm text-neutral-500">Trending:</span>
-            {skills.map(
-              (tag, i) => (
-                <motion.button
-                  key={tag}
+            <motion.div
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+              className="flex flex-nowrap items-center gap-4 w-max"
+            >
+              {[...skills, ...skills].map((tag, i) => (
+                <button
+                  key={`${tag}-${i}`}
                   type="button"
                   onClick={() => handleSearch(undefined, tag)}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 2 + i * 0.1 }}
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  className="px-4 py-2 text-sm bg-[#FFEAD4]/50 hover:bg-[#F24C20]/20 border border-[#FFE0C2] hover:border-[#F24C20]/50 rounded-full text-foreground hover:text-[#F24C20] transition-all duration-300"
+                  className="flex-shrink-0 whitespace-nowrap px-5 py-2.5 text-sm bg-[#FFEAD4]/50 hover:bg-[#F24C20]/20 border border-[#FFE0C2] hover:border-[#F24C20]/50 rounded-full text-foreground hover:text-[#F24C20] transition-all duration-300"
                 >
                   {tag}
-                </motion.button>
-              )
-            )}
+                </button>
+              ))}
+            </motion.div>
           </motion.div>
         </motion.div>
 
@@ -398,13 +397,13 @@ export default function HeroSection() {
           initial={{ opacity: 0, scale: 0.8, filter: 'blur(20px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
           transition={{ duration: 1.2, delay: 2.2 }}
-          className="relative max-w-5xl mx-auto"
+          className="relative max-w-5xl mx-auto mt-16 md:mt-0"
         >
           {/* Abstract Freelancing Scene */}
           <div className="relative">
             {/* Center Orb */}
             <motion.div
-              className="mx-auto w-64 h-64 rounded-full relative"
+              className="mx-auto w-64 h-64 rounded-full relative mt-8 md:mt-0"
               animate={{
                 boxShadow: [
                   '0 0 60px 20px rgba(242, 76, 32, 0.5)',
@@ -439,8 +438,7 @@ export default function HeroSection() {
                     delay: i * 0.5,
                   }}
                 >
-                  <div className="w-4 h-4 rounded-full bg-[#F24C20] shadow-lg shadow-[#F24C20]/50"
-                    style={{ marginLeft: '140px' }} />
+                  <div className="w-4 h-4 rounded-full bg-[#F24C20] shadow-lg shadow-[#F24C20]/50 ml-[140px]" />
                 </motion.div>
               ))}
 

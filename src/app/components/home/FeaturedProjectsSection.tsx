@@ -88,7 +88,7 @@ export default function FeaturedProjectsSection() {
   return (
     <section
       ref={ref}
-      className="relative py-25 overflow-hidden"
+      className="relative py-5 overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, var(--background) 0%, var(--secondary) 50%, var(--background) 100%)',
       }}
@@ -101,7 +101,7 @@ export default function FeaturedProjectsSection() {
 
       <div className="relative z-10">
         {/* Section Header */}
-        <div className="max-w-7xl mx-auto px-6 mb-16">
+        <div className="max-w-7xl mx-auto px-6 mb-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -119,10 +119,10 @@ export default function FeaturedProjectsSection() {
               </div>
             </motion.div>
 
-            <h2 className="text-5xl md:text-6xl font-bold mb-6">
-              <span className="text-foreground">Featured </span>
-              <span className="text-[#F24C20]">Projects</span>
-            </h2>
+           <h2 className="text-5xl md:text-5xl font-bold mb-4">
+            <span className="text-foreground">Featured </span>
+            <span className="text-[#F24C20]">Projects</span>
+          </h2>
 
             <p className="text-xl text-neutral-500 max-w-2xl mx-auto">
               Discover handpicked opportunities from verified clients worldwide

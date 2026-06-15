@@ -187,25 +187,27 @@ export default function TalentResultsPage({ answers }: TalentResultsPageProps) {
         <div className="flex items-start gap-4 mb-4">
           <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#FFEAD4]/20 flex-shrink-0">
             <img
-              src={talent.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(talent.full_name || 'Expert')}&size=128&background=random&color=fff`}
-              onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(talent.full_name || 'Expert')}&size=128&background=random&color=fff`; }}
+              src={talent.profile_image || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+              onError={(e) => { e.currentTarget.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"; }}
               alt={talent.full_name}
               className="w-full h-full object-cover group-hover:scale-110 transition-all"
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-foreground mb-1 truncate">{talent.full_name}</h4>
-            <p className="text-sm text-muted-foreground capitalize truncate">{talent.role}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold text-foreground">{talent.rating}</span>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-bold text-foreground truncate">{talent.full_name}</h4>
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="font-semibold text-foreground">{talent.rating}</span>
+              </div>
             </div>
+            <p className="text-sm text-muted-foreground capitalize truncate">{talent.role}</p>
           </div>
         </div>
       </div>
       
       <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
-        <div className="text-xl font-bold text-[#F24C20]">Starts from ₹{talent.hourly_rate || '1000'}</div>
+        {/* <div className="text-xl font-bold text-[#F24C20]">Starts from ₹{talent.hourly_rate || '1000'}</div> */}
         <Link to={`/talent/${talent.slug || talent.username || talent.id}`} className="px-4 py-2 rounded-lg bg-[#044071] hover:bg-[#055a99] text-white text-sm font-medium transition-colors">
           Profile
         </Link>
@@ -240,7 +242,7 @@ export default function TalentResultsPage({ answers }: TalentResultsPageProps) {
                   We found <span className="text-[#F24C20]">{filteredTalents.length}</span> world-class experts
                 </h1>
               </div>
-              <p className="text-lg lg:text-xl text-muted-foreground">Ready to transform your vision into reality</p>
+              <p className="text-lg lg:text-md text-muted-foreground">Ready to transform your vision into reality</p>
             </motion.div>
           </div>
         </section>
@@ -406,7 +408,7 @@ export default function TalentResultsPage({ answers }: TalentResultsPageProps) {
                         ))}
                       </div>
                     </div>
-
+Ready to transform your
                     <button 
                       onClick={() => setIsMobileFiltersOpen(false)}
                       className="w-full py-4 bg-[#F24C20] text-white rounded-2xl font-bold shadow-lg shadow-[#F24C20]/20"
@@ -433,8 +435,8 @@ export default function TalentResultsPage({ answers }: TalentResultsPageProps) {
                       <div className="relative flex-shrink-0">
                         <div className="relative w-24 h-24 lg:w-48 lg:h-48 rounded-2xl overflow-hidden bg-[#FFEAD4]/20">
                           <img
-                            src={featuredTalent.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(featuredTalent.full_name || 'Expert')}&size=200&background=random&color=fff`}
-                            onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(featuredTalent.full_name || 'Expert')}&size=200&background=random&color=fff`; }}
+                            src={featuredTalent.profile_image || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+                            onError={(e) => { e.currentTarget.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"; }}
                             alt={featuredTalent.full_name}
                             className="w-full h-full object-cover"
                           />
@@ -445,15 +447,17 @@ export default function TalentResultsPage({ answers }: TalentResultsPageProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="mb-2 lg:mb-3">
-                          <h3 className="text-xl lg:text-3xl font-bold text-foreground mb-0.5 truncate">{featuredTalent.full_name}</h3>
+                          <div className="flex items-center gap-3 mb-0.5">
+                            <h3 className="text-xl lg:text-2xl font-bold text-foreground truncate">{featuredTalent.full_name}</h3>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 lg:w-5 lg:h-5 fill-yellow-400 text-yellow-400" />
+                              <span className="font-bold text-foreground lg:text-lg">{featuredTalent.rating}</span>
+                            </div>
+                          </div>
                           <p className="text-sm lg:text-xl text-muted-foreground capitalize truncate">{featuredTalent.role}</p>
                         </div>
-                        <div className="flex items-center gap-2 mb-3 lg:mb-4">
-                          <Star className="w-4 h-4 lg:w-5 lg:h-5 fill-yellow-400 text-yellow-400" />
-                          <span className="font-bold text-foreground lg:text-lg">{featuredTalent.rating}</span>
-                        </div>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lg:gap-4 lg:mt-8">
-                          <div className="text-xl lg:text-3xl font-bold text-[#F24C20]">Starts from ₹{featuredTalent.hourly_rate || '1200'}</div>
+                          {/* <div className="text-xl lg:text-3xl font-bold text-[#F24C20]">Starts from ₹{featuredTalent.hourly_rate || '1200'}</div> */}
                           <Link to={`/talent/${featuredTalent.slug || featuredTalent.username || featuredTalent.id}`} className="w-full sm:w-auto px-4 lg:px-6 py-2 lg:py-3 rounded-xl bg-[#044071] hover:bg-[#055a99] text-white text-sm lg:font-semibold transition-colors text-center">View Profile</Link>
                         </div>
                       </div>

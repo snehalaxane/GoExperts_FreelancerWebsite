@@ -10,7 +10,7 @@ export default function FinalCTASection() {
   return (
     <section
       ref={ref}
-      className="relative py-18 overflow-hidden"
+      className="relative py-10 overflow-hidden"
       style={{
         background: 'radial-gradient(ellipse at center, var(--secondary) 0%, var(--background) 100%)',
       }}
@@ -114,7 +114,7 @@ export default function FinalCTASection() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-6xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight"
+            className="text-5xl md:text-5xl lg:text-5xl font-bold mb-8 leading-tight"
           >
             <span className="block text-foreground mb-3">
               Ready to{' '}
@@ -146,8 +146,8 @@ export default function FinalCTASection() {
                   />
                 </motion.svg>
               </motion.span>
+              {' '}Your Career?
             </span>
-            <span className="block text-foreground">Your Career?</span>
           </motion.h2>
 
           {/* Subtitle */}
@@ -155,7 +155,7 @@ export default function FinalCTASection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-2xl text-neutral-500 mb-16 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl text-neutral-500 mb-6 max-w-3xl mx-auto leading-relaxed"
           >
             Whether you're looking to hire top talent or find your next opportunity,{' '}
             <span className="text-[#F24C20] font-semibold">Go Experts</span> is your gateway to success.

@@ -60,7 +60,7 @@ export default function TrustStatsSection() {
   return (
     <section
       ref={ref}
-      className="relative py-28 overflow-hidden"
+      className="relative py-4 overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, var(--background) 0%, var(--secondary) 50%, var(--background) 100%)',
       }}
@@ -108,31 +108,31 @@ export default function TrustStatsSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-20 md:mb-8"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={isInView ? { scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-block mb-6"
+            className="inline-block mb-2"
           >
             <div className="px-5 py-2.5 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/30 backdrop-blur-sm">
               <span className="text-sm font-medium text-[#F24C20]">Trusted Globally</span>
             </div>
           </motion.div>
 
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
             <span className="text-foreground">Numbers That </span>
             <span className="text-[#F24C20]">Define Excellence</span>
           </h2>
 
-          <p className="text-xl text-neutral-500 max-w-4xl mx-auto">
+          <p className="text-xl text-neutral-500 max-w-4xl mx-auto mt-2">
             Join thousands of satisfied clients and verified experts building the future of work together
           </p>
         </motion.div>
 
         {/* Floating Stats - Responsive Grid */}
-        <div className="relative max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:flex lg:justify-center gap-4 md:gap-8 mb-20">
+        <div className="relative max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:flex lg:justify-center gap-4 md:gap-8 mb-5">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -154,7 +154,7 @@ export default function TrustStatsSection() {
               <motion.div
                 whileHover={{ y: -15, scale: 1.05 }}
                 transition={{ duration: 0.3 }}
-                className="relative w-full max-w-none md:w-72 p-5 sm:p-7 md:p-10 rounded-3xl bg-gradient-to-br from-white to-white backdrop-blur-xl border border-[#FFE0C2] hover:border-[#F24C20]/50 overflow-hidden shadow-xl shadow-orange-500/5"
+                className="relative w-full max-w-none md:w-62 p-2 sm:p-7 md:p-10 rounded-3xl bg-gradient-to-br from-white to-white backdrop-blur-xl border border-[#FFE0C2] hover:border-[#F24C20]/50 overflow-hidden shadow-xl shadow-orange-500/5"
               >
                 {/* Animated Border Glow */}
                 <motion.div
@@ -181,7 +181,7 @@ export default function TrustStatsSection() {
 
                 {/* Value */}
                 <div className="mb-3">
-                  <div className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground">
+                  <div className="text-3xl sm:text-4xl md:text-4xl font-bold text-foreground">
                     {stat.value < 100 && stat.value > 1 ? (
                       <Counter end={stat.value} />
                     ) : (
@@ -224,7 +224,7 @@ export default function TrustStatsSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="hidden md:flex mt-20 flex-wrap items-center justify-center gap-12"
+          className="hidden md:flex mt-10 flex-wrap items-center justify-center gap-12"
         >
           {trustBadges.map(
             (trust, i) => (

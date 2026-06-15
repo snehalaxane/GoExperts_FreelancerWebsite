@@ -153,10 +153,10 @@ export default function SavedItems() {
     <div className="space-y-8 pb-12">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-[#111111]">
+          <h1 className="text-2xl font-black tracking-tight text-[#111111]">
             Saved Items
           </h1>
-          <p className="mt-2 text-lg text-[#4a4a4a]">
+          <p className="mt-2 text-md text-[#4a4a4a]">
             Curating your personal dashboard of {userType === 'client' ? 'top-tier talent and services' : 'high-potential projects and ideas'}
           </p>
         </div>
@@ -358,9 +358,9 @@ export default function SavedItems() {
               <div className="w-24 h-24 bg-neutral-800/10 rounded-[3rem] flex items-center justify-center mx-auto mb-8">
                 {activeTab === 'talents' ? <Users className="w-12 h-12 text-neutral-500" /> : activeTab === 'gigs' ? <Package className="w-12 h-12 text-neutral-500" /> : activeTab === 'ideas' ? <Bookmark className="w-12 h-12 text-neutral-500" /> : <Briefcase className="w-12 h-12 text-neutral-500" />}
               </div>
-              <h3 className="mb-3 text-2xl font-black text-[#111111]">Collection Empty</h3>
-              <p className="mx-auto max-w-md text-lg text-[#4a4a4a]">You haven't added any {activeTab} to your personal collection yet. Start exploring to curate your dashboard.</p>
-              <button onClick={() => navigate('/')} className="mt-10 px-10 py-4 bg-[#F24C20] text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl shadow-[#F24C20]/20">Explore Marketplace</button>
+              <h3 className="mb-3 text-xl font-black text-[#111111]">Collection Empty</h3>
+              <p className="mx-auto max-w-md text-md text-[#4a4a4a]">You haven't added any {activeTab} to your personal collection yet. Start exploring to curate your dashboard.</p>
+              <button onClick={() => navigate('/')} className="mt-10 px-3 py-3 bg-[#F24C20] text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl shadow-[#F24C20]/20">Explore Marketplace</button>
             </div>
           )}
         </motion.div>

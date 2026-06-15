@@ -145,7 +145,7 @@ export default function CategoriesSection() {
   };
 
   return (
-    <section ref={ref} className="relative py-20 overflow-hidden bg-background text-foreground">
+    <section ref={ref} className="relative py-15 overflow-hidden bg-background text-foreground">
       {/* Animated Background */}
       <div className="absolute inset-0">
         <motion.div
@@ -168,17 +168,18 @@ export default function CategoriesSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
           <div className="inline-block mb-4">
             <div className="px-4 py-2 rounded-full bg-[#F24C20]/10 border border-[#F24C20]/20">
               <span className="text-sm font-medium text-[#F24C20]">Explore Categories</span>
             </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Enter the Skill Portals
+          <h2 className="text-5xl md:text-5xl font-bold mb-4">
+            <span className="text-foreground">Enter The </span>
+            <span className="text-[#F24C20]">Skill Portals</span>
           </h2>
-          <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-400 max-w-4xl mx-auto">
             Discover verified experts across every domain. Each category is a gateway to exceptional talent.
           </p>
         </motion.div>
@@ -327,11 +328,11 @@ export default function CategoriesSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-12"
+          className="text-center mt-6"
         >
           <button 
             onClick={() => navigate('/categories')}
-            className="px-8 py-4 bg-white hover:bg-[#FFEAD4]/20 border border-[#FFE0C2] hover:border-[#F24C20]/50 rounded-xl text-foreground font-semibold transition-all duration-300 group"
+            className="px-4 py-4 bg-white hover:bg-[#FFEAD4]/20 border border-[#FFE0C2] hover:border-[#F24C20]/50 rounded-xl text-foreground font-semibold transition-all duration-300 group"
           >
             <span className="flex items-center gap-2">
               Explore All Categories

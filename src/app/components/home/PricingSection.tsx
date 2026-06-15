@@ -119,7 +119,7 @@ export default function PricingSection() {
   };
 
   return (
-    <section ref={ref} className="relative py-24 overflow-hidden bg-background text-foreground">
+    <section ref={ref} className="relative py-10 overflow-hidden bg-background text-foreground">
       {/* Background Glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-[#F24C20]/5 rounded-full blur-[120px]" />
@@ -140,7 +140,7 @@ export default function PricingSection() {
               {subtitle}
             </div>
             
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-8 italic uppercase tracking-tighter leading-tight">
+            <h2 className="text-4xl font-black text-foreground mb-8 italic uppercase tracking-tighter leading-tight">
               {title}
             </h2>
             

@@ -620,8 +620,8 @@ export default function Settings() {
   return (
     <div className="space-y-6 pb-12 text-[#111111]">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="px-1 md:px-0">
-        <h1 className="text-2xl md:text-3xl font-bold text-[#111111]">Settings</h1>
-        <p className="mt-1 md:mt-2 text-sm text-[#4a4a4a]">Manage your account settings and preferences</p>
+        <h1 className="text-2xl md:text-2xl font-bold text-[#111111]">Settings</h1>
+        <p className="mt-1 md:mt-2 text-md text-[#4a4a4a]">Manage your account settings and preferences</p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -1104,7 +1104,7 @@ export default function Settings() {
                   </div>
                 </div>
                 <p className="text-sm mb-8 !text-[#4a4a4a] leading-relaxed">Click below to receive a secure link at <strong className="!text-[#111111]">{formData.email}</strong> to change your password.</p>
-                <button onClick={handleSendResetLink} disabled={isSaving} className="w-full sm:w-auto px-10 py-4 bg-[#044071] text-white rounded-xl font-bold hover:bg-[#055a99] transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg shadow-[#044071]/20">
+                <button onClick={handleSendResetLink} disabled={isSaving} className="w-full sm:w-auto px-4 py-4 bg-[#044071] text-white rounded-xl font-bold hover:bg-[#055a99] transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg shadow-[#044071]/20">
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />}
                   Send Security Link
                 </button>
@@ -1301,7 +1301,7 @@ export default function Settings() {
                 </div>
 
 
-                <button type="submit" disabled={isSaving} className="w-full sm:w-auto px-10 py-4 bg-[#044071] !text-white rounded-xl font-bold hover:bg-[#055a99] disabled:opacity-50 transition-all shadow-lg shadow-[#044071]/20">
+                <button type="submit" disabled={isSaving} className="w-full sm:w-auto px-4 py-4 bg-[#044071] !text-white rounded-xl font-bold hover:bg-[#055a99] disabled:opacity-50 transition-all shadow-lg shadow-[#044071]/20">
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Profile Changes'}
                 </button>
               </form>

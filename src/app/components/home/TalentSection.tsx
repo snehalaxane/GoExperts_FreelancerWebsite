@@ -68,7 +68,7 @@ export default function TalentSection() {
   return (
     <section
       ref={ref}
-      className="relative py-25 overflow-hidden"
+      className="relative py-10 overflow-hidden"
       style={{
         background: 'radial-gradient(ellipse at bottom, var(--secondary) 0%, var(--background) 100%)',
       }}
@@ -108,7 +108,7 @@ export default function TalentSection() {
             </div>
           </motion.div>
 
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-5">
             <span className="text-foreground">Meet World-Class </span>
             <span className="text-[#F24C20]">Talent</span>
           </h2>
@@ -119,7 +119,7 @@ export default function TalentSection() {
         </motion.div>
 
         {/* Floating Talent Cards - Staggered Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 items-stretch">
           {(loading ? mockTalents.slice(0, 4) : talents).map((talent, index) => (
             <motion.div
               key={talent.id}

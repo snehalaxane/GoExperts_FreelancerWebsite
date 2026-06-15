@@ -314,7 +314,7 @@ export default function ProjectDetails() {
   const canSeeFullDetails = isUnlocked || isOwner || isHired;
 
   return (
-    <div className={`min-h-screen pt-24 lg:pt-36 pb-12 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+    <div className={`min-h-screen pt-5 lg:pt-5 pb-12 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Main Content */}
@@ -370,7 +370,7 @@ export default function ProjectDetails() {
                     </span>
                     <span className={`text-[10px] lg:text-sm ${isDarkMode ? 'text-neutral-400' : 'text-[#7a5a49]'}`}>{project.postedTime}</span>
                   </div>
-                  <h1 className={`text-2xl lg:text-4xl font-bold mb-4 line-clamp-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                  <h1 className={`text-2xl lg:text-3xl font-bold mb-4 line-clamp-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
                     {project.title}
                   </h1>
                   <div className={`flex flex-wrap items-center gap-4 ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>
@@ -391,13 +391,13 @@ export default function ProjectDetails() {
             <div className={`p-5 lg:p-6 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className={`text-xs mb-1 ${isDarkMode ? 'text-neutral-400' : 'text-[#7a5a49]'}`}>Project Budget</div>
+                  <div className="text-lg lg:text-lg font-black text-white uppercase tracking-tight">Project Budget</div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xl lg:text-2xl font-black ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                    <span className={`text-md lg:text-lg font-black ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
                       {project.budget_range}
                     </span>
                   </div>
-                  <div className={`text-[10px] lg:text-sm mt-1 uppercase tracking-widest font-black ${isDarkMode ? 'text-neutral-400 opacity-50' : 'text-[#8b6b5a]'}`}>Fixed Price</div>
+                  <div className={`text-[10px] lg:text-sm mt-1 uppercase tracking-widest font-black ${isDarkMode ? 'text-neutral-600' : 'text-[#8b6b5a]'}`}>Fixed Price</div>
                 </div>
               </div>
             </div>
@@ -407,7 +407,7 @@ export default function ProjectDetails() {
               <div className="p-6 lg:p-8 bg-neutral-900 border border-neutral-800 rounded-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
-                         <h2 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tight">Review Proposals</h2>
+                         <h2 className="text-lg lg:text-lg font-black text-white uppercase tracking-tight">Review Proposals</h2>
                          <p className="text-xs lg:text-sm text-neutral-400 mt-1 font-medium">
                            {project.status === 'live' 
                              ? 'View and award your project to the best freelancer.' 
@@ -516,7 +516,7 @@ export default function ProjectDetails() {
                 </div>
               )}
 
-              <h2 className={`text-xl lg:text-2xl font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Project Description</h2>
+              <h2 className={`text-lg lg:text-lg font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Project Description</h2>
 
               <div className={`prose max-w-none whitespace-pre-line text-sm lg:text-base leading-relaxed ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
                 {project.description}
@@ -557,7 +557,7 @@ export default function ProjectDetails() {
 
             {/* Skills Required */}
             <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
-              <h2 className={`text-xl lg:text-2xl font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Expertise Required</h2>
+              <h2 className={`text-lg lg:text-lg font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Expertise Required</h2>
               <div className="flex flex-wrap gap-2 lg:gap-3">
                 {project.skills_required?.map((skill: string) => (
                   <span
@@ -575,7 +575,7 @@ export default function ProjectDetails() {
             {/* More Projects from this Client */}
             {clientProjects.length > 0 && (
               <div>
-                <h2 className={`text-2xl font-bold mb-6 flex items-center justify-between ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>
+                <h2 className={`text-lg font-bold mb-6 flex items-center justify-between ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>
                   <span>More Projects from this Client</span>
                   <Link 
                     to={`/projects?search=${encodeURIComponent(project.client_id?.full_name || '')}`} 
@@ -843,7 +843,7 @@ export default function ProjectDetails() {
                     )}
 
                     <div className="text-center mb-6">
-                      <div className={`text-3xl lg:text-4xl font-black mb-2 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{project.budget_range}</div>
+                      <div className={`text-sm lg:text-xl font-black mb-2 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{project.budget_range}</div>
                       <div className={`text-[10px] lg:text-xs uppercase font-black tracking-[0.2em] ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>Fixed Compensation</div>
                     </div>
 
@@ -896,7 +896,7 @@ export default function ProjectDetails() {
                       {isOwner && project.status !== 'closed' && (
                         <button
                           onClick={() => navigate(`/dashboard/projects/edit/${project._id}`)}
-                          className="w-full py-4 bg-[#F24C20] hover:bg-orange-600 text-white rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all shadow-xl shadow-[#F24C20]/20 flex items-center justify-center gap-2"
+                          className="w-full py-2 bg-[#F24C20] hover:bg-orange-600 text-white rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all shadow-xl shadow-[#F24C20]/20 flex items-center justify-center gap-2"
                         >
                           <FileText className="w-4 h-4" />
                           Edit Project
@@ -906,7 +906,7 @@ export default function ProjectDetails() {
                       <div className="relative group/share">
                         <button
                           onClick={() => setShowShareModal(!showShareModal)}
-                          className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all flex items-center justify-center gap-2 ${isDarkMode ? 'bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-[#2b160e]' : 'bg-[#fff7ef] hover:bg-[#F24C20] border border-[#f2d7c2] text-[#2b160e]'}`}
+                          className={`w-full py-2 rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all flex items-center justify-center gap-2 ${isDarkMode ? 'bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-[#2b160e]' : 'bg-[#fff7ef] hover:bg-[#F24C20] border border-[#f2d7c2] text-[#2b160e]'}`}
                         >
                           <Share2 className="w-4 h-4" /> Share
                         </button>
@@ -941,7 +941,7 @@ export default function ProjectDetails() {
                   {/* Client Profile Card */}
                   {!isOwner && (
                     <div className={`p-6 lg:p-8 rounded-2xl relative overflow-hidden ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
-                      <h3 className={`text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] mb-6 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>About the Client</h3>
+                      <h3 className={`text-[10px] lg:text-sm font-black uppercase tracking-[0.2em] mb-6 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>About the Client</h3>
                       {project.client_id ? (
                         <>
                           <div className="flex items-center gap-4 mb-6">
@@ -988,8 +988,8 @@ export default function ProjectDetails() {
                           <div className="w-12 h-12 lg:w-16 lg:h-16 bg-black/40 border border-neutral-800 rounded-full mx-auto mb-4 flex items-center justify-center">
                             <Lock className="w-6 h-6 text-neutral-500" />
                           </div>
-                          <p className="text-[10px] lg:text-xs text-neutral-500 font-medium px-4 leading-relaxed mb-4 text-center">Identity hidden. Express interest to view full profile.</p>
-                          <button onClick={() => setShowUnlockModal(true)} className="text-[#F24C20] font-black text-[10px] uppercase tracking-widest hover:underline">Unlock Now</button>
+                          <p className="text-[10px] lg:text-sm text-neutral-500 font-medium px-4 leading-relaxed mb-4 text-center">Identity hidden. Express interest to view full profile.</p>
+                          <button onClick={() => setShowUnlockModal(true)} className="text-[#F24C20] font-black text-[12px] uppercase tracking-widest hover:underline">Unlock Now</button>
                         </div>
                       )}
                     </div>
@@ -997,7 +997,7 @@ export default function ProjectDetails() {
 
                   {/* Project Activity */}
                   <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
-                    <h3 className={`text-[10px] lg:text-xs font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Project Activity</h3>
+                    <h3 className={`text-[10px] lg:text-sm font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Project Activity</h3>
                     <div className="space-y-4 font-bold">
                       <div className="flex items-center justify-between">
                         <div className={`flex items-center gap-3 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>
@@ -1017,7 +1017,7 @@ export default function ProjectDetails() {
                           {project.stats?.interviewing || 0}
                         </span>
                       </div>
-                      <div className={`pt-4 flex items-center justify-between text-[10px] uppercase font-black ${isDarkMode ? 'border-t border-neutral-800 text-neutral-600' : 'border-t border-[#f2d7c2] text-[#8b6b5a]'}`}>
+                      <div className={`pt-4 flex items-center justify-between text-[12px] uppercase font-black ${isDarkMode ? 'border-t border-neutral-800 text-neutral-600' : 'border-t border-[#f2d7c2] text-[#8b6b5a]'}`}>
                         <span>Last Updated</span>
                         <span>{project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'Today'}</span>
                       </div>
@@ -1026,17 +1026,17 @@ export default function ProjectDetails() {
 
                   {/* Quick Questions */}
                   <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
-                    <h3 className={`text-[10px] lg:text-xs font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Quick Questions</h3>
+                    <h3 className={`text-[12px] lg:text-sm font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Quick Questions</h3>
                     <div className="space-y-4">
                       <details className="group">
-                        <summary className={`flex items-center justify-between cursor-pointer text-xs lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                        <summary className={`flex items-center justify-between cursor-pointer text-sm lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
                           Is this fixed or hourly?
                           <span className="text-[#F24C20] group-open:rotate-180 transition-transform">▼</span>
                         </summary>
                         <p className={`mt-3 text-[11px] lg:text-xs leading-relaxed font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#6f5548]'}`}>This is a {project.budget_range ? 'Fixed/Negotiated' : 'N/A'} project. Payments are released upon milestone completion.</p>
                       </details>
                       <details className="group">
-                        <summary className={`flex items-center justify-between cursor-pointer text-xs lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                        <summary className={`flex items-center justify-between cursor-pointer text-sm lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
                           Can I submit a sample?
                           <span className="text-[#F24C20] group-open:rotate-180 transition-transform">▼</span>
                         </summary>

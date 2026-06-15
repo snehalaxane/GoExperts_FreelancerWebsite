@@ -362,10 +362,10 @@ export default function SubscriptionPlansPricingPage() {
               >
                 Subscription-Based Platform
               </motion.div>
-              <h1 className="text-4xl font-black leading-tight sm:text-6xl lg:text-5xl uppercase tracking-tighter mb-8  text-[#1f120d]">
+              <h1 className="text-2xl font-black leading-tight sm:text-6xl lg:text-3xl uppercase tracking-tighter mb-2  text-[#1f120d]">
                 {settings?.subscription_title || "The New Standard of Direct Networking."}
               </h1>
-              <p className="text-lg leading-8 text-[#6f5548] max-w-2xl mb-12">
+              <p className="text-lg leading-8 text-[#6f5548] max-w-2xl">
                 {settings?.subscription_description || "GoExperts runs on a clean yearly subscription model. No bidding, no commissions, just direct access to the world's best talent, founders, and investors."}
               </p>
 
@@ -426,7 +426,7 @@ export default function SubscriptionPlansPricingPage() {
       <div id="pricing-sections">
         {sortedGroups.map((group) => {
           return (
-            <section key={group.name} className="border-t border-[#f0d7c7] py-24">
+            <section key={group.name} className="border-t border-[#f0d7c7] py-4">
               <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
                   <div className="max-w-3xl">
@@ -434,7 +434,7 @@ export default function SubscriptionPlansPricingPage() {
                       <DynamicIcon name={group.icon} className="h-3.5 w-3.5" />
                       {group.name}
                     </div>
-                    <h2 className="mt-4 md:mt-6 text-3xl font-black uppercase tracking-tighter sm:text-5xl text-[#1f120d]">
+                    <h2 className="mt-4 md:mt-6 text-xl font-black tracking-tighter sm:text-5xl text-[#1f120d]">
                       {group.label}
                     </h2>
                     <p className="mt-3 md:mt-4 text-sm leading-7 text-[#6f5548] sm:text-base">{group.description}</p>
@@ -528,14 +528,14 @@ export default function SubscriptionPlansPricingPage() {
         </section>
       )}
 
-      <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 border-t border-[#f0d7c7]">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 border-t border-[#f0d7c7]">
         <SectionTitle
           eyebrow="Feature comparison"
           title="Simple comparison across the platform"
           description="A transparent subscription structure makes it easy for users to understand what is included at each level."
         />
 
-        <div className="mt-12 overflow-x-auto rounded-[24px] md:rounded-[40px] border border-[#f2d7c2] bg-white/90 custom-scrollbar shadow-sm">
+        <div className="mt-2 overflow-x-auto rounded-[24px] md:rounded-[40px] border border-[#f2d7c2] bg-white/90 custom-scrollbar shadow-sm">
           <div className="min-w-[800px]">
             <div className="grid grid-cols-5 border-b border-[#f2d7c2] bg-[#fff8f3] text-[10px] md:text-xs font-black uppercase tracking-widest text-[#1f120d]">
               <div className="p-4 md:p-6">Feature</div>
@@ -559,23 +559,23 @@ export default function SubscriptionPlansPricingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 mb-20">
-        <div className="rounded-[48px] border border-[#f2d7c2] bg-gradient-to-r from-[#F24C20]/12 via-white to-[#eaf3ff] p-10 shadow-2xl shadow-[#F24C20]/10 sm:p-16 lg:p-20 text-center lg:text-left">
+      <section className="mx-auto max-w-7xl sm:px-2 lg:px-2 mb-2">
+        <div className="rounded-[48px] border border-[#f2d7c2] bg-gradient-to-r from-[#F24C20]/12 via-white to-[#eaf3ff] p-10 shadow-2xl shadow-[#F24C20]/10 sm:p-16 lg:p-10 text-center lg:text-left">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center rounded-full border border-[#F24C20]/20 bg-[#F24C20]/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#F24C20] mb-6">
+            <div className="inline-flex items-center rounded-full border border-[#F24C20]/20 bg-[#F24C20]/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#F24C20] mb-4">
               GoExperts Pricing Strategy
             </div>
-            <h2 className="text-4xl font-black  uppercase tracking-tighter sm:text-6xl text-[#1f120d] mb-8">Zero commission. <br/>Direct connections.</h2>
-            <p className="text-lg leading-8 text-[#6f5548] mb-10 max-w-2xl">
+            <h2 className="text-4xl tracking-tighter sm:text-4xl text-[#1f120d] mb-8">Zero commission. <br/>Direct connections.</h2>
+            <p className="text-lg leading-8 text-[#6f5548] mb-6 max-w-2xl">
               Position GoExperts as a clean subscription-first marketplace where freelancers, clients, founders, and investors get predictable pricing and better-quality connections.
             </p>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
-            <button className="rounded-2xl bg-[#F24C20] px-10 py-5 text-sm font-black uppercase tracking-widest text-white transition hover:bg-[#F24C20]/80 shadow-xl shadow-[#F24C20]/20">
+            <button className="rounded-2xl bg-[#F24C20] px-3 py-3 text-sm font-black uppercase tracking-widest text-white transition hover:bg-[#F24C20]/80 shadow-xl shadow-[#F24C20]/20">
               Start Annual Plan
             </button>
-            <button className="rounded-2xl border border-[#f2d7c2] bg-white px-10 py-5 text-sm font-black uppercase tracking-widest text-[#1f120d] transition hover:border-[#F24C20]/40 hover:bg-[#fff8f3]">
+            <button className="rounded-2xl border border-[#f2d7c2] bg-white px-3 py-3 text-sm font-black uppercase tracking-widest text-[#1f120d] transition hover:border-[#F24C20]/40 hover:bg-[#fff8f3]">
               Request Demo
             </button>
           </div>

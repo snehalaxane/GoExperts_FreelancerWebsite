@@ -154,7 +154,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="relative pt-20 pb-8 overflow-hidden border-t border-[#FFE0C2]"
+      className="relative pt-4 pb-4 overflow-hidden border-t border-[#FFE0C2]"
       style={{
         background: 'linear-gradient(180deg, var(--background) 0%, var(--secondary) 100%)',
       }}
@@ -223,7 +223,7 @@ export default function Footer() {
         </div>
 
         {/* App Download Section */}
-        <div className="border-t border-[#FFE0C2] pt-10 pb-10">
+        <div className="border-t border-[#FFE0C2] pt-5 pb-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h4 className="text-foreground font-semibold mb-2">Get the Go Experts App</h4>

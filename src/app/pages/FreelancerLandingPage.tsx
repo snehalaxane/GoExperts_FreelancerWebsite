@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   User,
@@ -84,9 +84,52 @@ export default function FreelancerLandingPage() {
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [unlockReason, setUnlockReason] = useState<'portfolio' | 'chat'>('portfolio');
 
+  const mainRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({
+    home: null, about: null, portfolio: null, contact: null
+  });
+
+  const scrollToSection = (sectionId: string) => {
+    const el = sectionRefs.current[sectionId];
+    if (el && mainRef.current) {
+      mainRef.current.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+    }
+    setActiveSection(sectionId as any);
+  };
+
   useEffect(() => {
     fetchTalentDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (!talent) return;
+    let container: HTMLDivElement | null = null;
+
+    const onScroll = () => {
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      const sections = ['home', 'about', 'portfolio', 'contact'] as const;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = sectionRefs.current[sections[i]];
+        if (el && el.offsetTop - 120 <= scrollTop) {
+          setActiveSection(sections[i]);
+          break;
+        }
+      }
+    };
+
+    // Wait a tick for refs to be populated after render
+    const frame = requestAnimationFrame(() => {
+      container = mainRef.current;
+      if (!container) return;
+      container.addEventListener('scroll', onScroll, { passive: true });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      if (container) container.removeEventListener('scroll', onScroll);
+    };
+  }, [talent]);
 
   useEffect(() => {
     if (talent) {
@@ -238,11 +281,8 @@ export default function FreelancerLandingPage() {
           <button
             key={item.id}
             onClick={() => {
-              if ('action' in item && item.action) {
-                item.action();
-                return;
-              }
-              setActiveSection(item.id as any);
+              if ('action' in item && item.action) { item.action(); return; }
+              scrollToSection(item.id);
             }}
             className={`group relative w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-500 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.35)] ${activeSection === item.id
               ? 'bg-[#F24C20] border-[#ff8a66] shadow-[0_10px_30px_rgba(242,76,32,0.28)]'
@@ -264,11 +304,8 @@ export default function FreelancerLandingPage() {
           <button
             key={item.id}
             onClick={() => {
-              if ('action' in item && item.action) {
-                item.action();
-                return;
-              }
-              setActiveSection(item.id as any);
+              if ('action' in item && item.action) { item.action(); return; }
+              scrollToSection(item.id);
             }}
             className={`flex flex-col items-center gap-1 ${activeSection === item.id ? 'text-[#F24C20]' : 'text-[#7a5a49]'
               }`}
@@ -280,17 +317,12 @@ export default function FreelancerLandingPage() {
       </nav>
 
       {/* Main Content Sections */}
-      <main className="relative z-10 w-full h-screen overflow-y-auto overflow-x-hidden scroll-smooth pt-24 lg:pt-32">
-        <AnimatePresence mode="wait">
-          {activeSection === 'home' && (
-            <motion.section
-              key="home"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="relative min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] w-full overflow-hidden"
-            >
+      <main ref={mainRef} className="relative z-10 w-full h-screen overflow-y-auto overflow-x-hidden scroll-smooth pt-24 lg:pt-32">
+          <section
+            id="home"
+            ref={el => { sectionRefs.current['home'] = el; }}
+            className="relative min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] w-full overflow-hidden"
+          >
               <div className="fixed top-0 left-0 w-full h-full bg-[#fdf7f2] z-[-2]" />
               <div
                 className="fixed top-0 left-0 w-full h-full opacity-[0.10] lg:opacity-[0.14] z-[-1]"
@@ -309,12 +341,13 @@ export default function FreelancerLandingPage() {
                 }}
               />
 
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-6 pb-32 lg:py-0 min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] flex items-center">
-                <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(320px,420px)_72px_minmax(0,1fr)] items-center gap-8 lg:gap-10 xl:gap-14 pr-0 lg:pr-24">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-6 pb-32 lg:pt-8 lg:pb-20 min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] flex items-start">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(180px,288px)_56px_minmax(0,1fr)] items-center gap-6 lg:gap-8 xl:gap-10 pr-0 lg:pr-24">
                   <div className="w-full flex justify-center lg:justify-start z-10 order-1">
-                    <div className="relative w-72 h-80 sm:w-80 sm:h-[26rem] lg:w-[420px] lg:h-[580px] overflow-hidden rounded-[2.5rem] shadow-2xl bg-white border-4 border-white">
-                      <ImageWithFallback
-                        src={getImgUrl(talent.profile_image)}
+                    <div className="relative w-52 h-64 sm:w-60 sm:h-72 lg:w-72 lg:h-80 overflow-hidden rounded-[2.5rem] shadow-2xl bg-white border-4 border-white">
+                      <img
+                        src={talent.profile_image ? getImgUrl(talent.profile_image) : "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"; }}
                         alt={talent.full_name}
                         className="w-full h-full object-cover"
                       />
@@ -367,21 +400,21 @@ export default function FreelancerLandingPage() {
                       <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-start">
                         <div className="flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
                           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-green-500">Available For Hire</span>
+                          <span className="text-[13px] font-black uppercase tracking-widest text-green-500">Available For Hire</span>
                         </div>
                         <div className="flex items-center gap-2 px-4 py-1.5 bg-[#F24C20]/10 border border-[#F24C20]/20 rounded-full">
                           <IndianRupee className="w-3 h-3 text-[#F24C20]" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#F24C20]">Starts from ₹{talent.hourly_rate || '1200'}</span>
+                          <span className="text-[13px] font-black uppercase tracking-widest text-[#F24C20]">Starts from ₹{talent.hourly_rate || '1200'}</span>
                         </div>
                       </div>
                     </div>
 
                     <h1 className="flex flex-col mb-4 lg:mb-6">
-                      <span className="text-lg sm:text-xl lg:text-3xl font-black text-[#1f120d] uppercase tracking-widest mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-4">
+                      <span className="text-lg sm:text-xl lg:text-4xl font-black text-[#1f120d] uppercase tracking-widest mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-4">
                         <span className="w-10 h-[4px] bg-[#F24C20]" />
                         I'm <span className="text-[#F24C20]">{talent.full_name}.</span>
                       </span>
-                      <span className="text-4xl sm:text-5xl lg:text-7xl font-black uppercase text-[#1f120d] leading-[1.05] break-words">
+                      <span className="text-4xl sm:text-5xl lg:text-xl font-black uppercase text-[#1f120d] leading-[1.05] break-words">
                         {talent.role_title || 'Expert Professional'}
                       </span>
                     </h1>
@@ -390,12 +423,12 @@ export default function FreelancerLandingPage() {
                       {talent.bio || 'I am a passionate freelancer dedicated to delivering high-quality work and exceeding client expectations.'}
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-6 w-full sm:w-auto max-w-sm mx-auto lg:mx-0">
+                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 lg:gap-6 w-full sm:w-auto mx-auto lg:mx-0">
                       <button
                         onClick={() => setActiveSection('about')}
-                        className="group relative flex h-14 w-full sm:w-[310px] lg:w-[330px] items-center bg-white border-2 border-[#F24C20] rounded-full font-black text-sm tracking-[0.12em] overflow-hidden transition-all duration-300 text-[#2b160e]"
+                        className="group relative flex h-14 w-full sm:w-auto items-center bg-white border-2 border-[#F24C20] rounded-full font-black text-sm tracking-[0.12em] overflow-hidden transition-all duration-300 text-[#2b160e]"
                       >
-                        <span className="relative z-10 block w-[calc(100%-56px)] pl-8 pr-6 whitespace-nowrap text-left group-hover:text-white transition-colors duration-300">
+                        <span className="relative z-10 block pl-8 pr-16 whitespace-nowrap text-left group-hover:text-white transition-colors duration-300">
                           More About Me
                         </span>
                         <div className="absolute top-0 right-0 h-full w-14 bg-[#F24C20] rounded-full flex items-center justify-center z-20 transition-transform group-hover:scale-110">
@@ -406,9 +439,9 @@ export default function FreelancerLandingPage() {
 
                       <button
                         onClick={handleHireMeNow}
-                        className="group relative flex h-14 w-full sm:w-[280px] lg:w-[370px] items-center bg-[#F24C20] rounded-full font-black text-sm tracking-[0.12em] overflow-hidden transition-all duration-300 shadow-lg shadow-[#F24C20]/20 hover:scale-105"
+                        className="group relative flex h-14 w-full sm:w-auto items-center bg-[#F24C20] rounded-full font-black text-sm tracking-[0.12em] overflow-hidden transition-all duration-300 shadow-lg shadow-[#F24C20]/20 hover:scale-105"
                       >
-                        <span className="relative z-10 block w-[calc(100%-56px)] pl-8 pr-8 whitespace-nowrap text-left text-white">
+                        <span className="relative z-10 block pl-8 pr-16 whitespace-nowrap text-left text-white">
                           Hire Me Now
                         </span>
                         <div className="absolute top-0 right-0 h-full w-14 bg-black/10 rounded-full flex items-center justify-center">
@@ -419,17 +452,13 @@ export default function FreelancerLandingPage() {
                   </div>
                 </div>
               </div>
-            </motion.section>
-          )}
+          </section>
 
-          {activeSection === 'about' && (
-            <motion.section
-              key="about"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
-            >
+          <section
+            id="about"
+            ref={el => { sectionRefs.current['about'] = el; }}
+            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
+          >
               <div className="text-center mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Shortly</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">About <span className="text-[#F24C20]">Me</span></h3>
@@ -437,31 +466,31 @@ export default function FreelancerLandingPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
                 <div>
-                  <h4 className="text-2xl font-bold mb-8 uppercase tracking-widest">Personal Infos</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 text-[#6f5548]">
+                  <h4 className="text-2xl font-bold mb-8 uppercase tracking-widest">Personal Information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 text-gray-900 font-bold">
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Full Name</span>
-                      <span className="text-[#1f120d] font-bold">{talent.full_name}</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Full Name</span>
+                      <span className="text-[#1f120d] font-semibold">{talent.full_name}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Role</span>
-                      <span className="text-[#1f120d] font-bold">{talent.role_title || 'Expert'}</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Role</span>
+                      <span className="text-[#1f120d] font-semibold">{talent.role_title || 'Expert'}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Experience</span>
-                      <span className="text-[#1f120d] font-bold capitalize">{talent.experience_level || 'Pro'}</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Experience</span>
+                      <span className="text-[#1f120d] font-semibold capitalize">{talent.experience_level || 'Pro'}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Freelance</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Freelance</span>
                       <span className="text-green-400 font-bold">{talent.availability || 'Available'}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Address</span>
-                      <span className="text-[#1f120d] font-bold">{talent.location || 'Remote'}</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Address</span>
+                      <span className="text-[#1f120d] font-semibold">{talent.location || 'Remote'}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs uppercase tracking-widest opacity-50 p-0 m-0">Languages</span>
-                      <span className="text-[#1f120d] font-bold">{talent.languages?.join(', ') || 'English, Hindi'}</span>
+                      <span className="text-xs uppercase tracking-widest p-0 m-0">Languages</span>
+                      <span className="text-[#1f120d] font-semibold">{talent.languages?.join(', ') || 'English, Hindi'}</span>
                     </div>
                   </div>
 
@@ -547,17 +576,13 @@ export default function FreelancerLandingPage() {
                   </div>
                 </div>
               </div>
-            </motion.section>
-          )}
+          </section>
 
-          {activeSection === 'portfolio' && (
-            <motion.section
-              key="portfolio"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
-            >
+          <section
+            id="portfolio"
+            ref={el => { sectionRefs.current['portfolio'] = el; }}
+            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
+          >
               <div className="text-center mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Works</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">My <span className="text-[#F24C20]">Portfolio</span></h3>
@@ -650,17 +675,13 @@ export default function FreelancerLandingPage() {
                     </div>
                   )}
                 </div>
-            </motion.section>
-          )}
+          </section>
 
-          {activeSection === 'contact' && (
-            <motion.section
-              key="contact"
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              className="max-w-7xl mx-auto px-6 pt-18 pb-32 lg:py-10 text-[#1f120d]"
-            >
+          <section
+            id="contact"
+            ref={el => { sectionRefs.current['contact'] = el; }}
+            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-10 text-[#1f120d]"
+          >
               <div className="text-center mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Contact</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">Get In <span className="text-[#F24C20]">Touch With Talent</span></h3>
@@ -784,9 +805,7 @@ export default function FreelancerLandingPage() {
                   )}
                 </div>
               </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
+          </section>
       </main>
       {/* Portfolio Item Modal */}
       <AnimatePresence>

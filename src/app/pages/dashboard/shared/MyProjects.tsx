@@ -171,10 +171,10 @@ export default function MyProjects() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#111111]">
+          <h1 className="text-2xl md:text-2xl font-bold text-[#111111]">
             {isFreelancer ? 'My Proposals' : 'My Projects'}
           </h1>
-          <p className="mt-1 text-sm text-[#4a4a4a]">
+          <p className="mt-1 text-md text-[#4a4a4a]">
             {isFreelancer ? 'Track your proposals and active work' : 'Manage projects and track hired talent'}
           </p>
         </div>

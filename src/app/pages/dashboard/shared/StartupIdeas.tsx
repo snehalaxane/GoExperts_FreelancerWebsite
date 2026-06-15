@@ -675,27 +675,27 @@ export default function StartupIdeas() {
   return (
     <div className="space-y-4">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-[32px] bg-[#044071] px-8 py-9 lg:px-12 lg:py-11 text-white">
+      <div className="relative overflow-hidden rounded-[24px] bg-[#044071] px-4 py-6 lg:px-10 lg:py-6 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(242,76,32,0.24),transparent_34%),linear-gradient(120deg,rgba(4,64,113,0),rgba(255,255,255,0.08))] pointer-events-none" />
-        <div className="relative z-10 max-w-3xl">
+        <div className="relative z-10 max-w-4xl">
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-sm font-medium mb-5"
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium mb-3"
             >
-                <Rocket className="w-4 h-4 text-orange-400" />
+                <Rocket className="w-3 h-3 text-orange-400" />
                 Go Experts Startup Hub
             </motion.div>
-            <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-4 max-w-2xl">
+            <h1 className="text-2xl lg:text-xl font-bold leading-tight mb-2 max-w-2xl">
               Turn your startup idea into an <span className="text-orange-400">investable</span> opportunity.
             </h1>
-            <p className="text-blue-100 text-base lg:text-lg mb-7 leading-relaxed max-w-2xl">
+            <p className="text-blue-100 text-sm lg:text-base mb-4 leading-relaxed max-w-2xl">
               Submit your project concepts through a structured workflow, showcase your vision with clarity, and connect with partners using smart matching.
             </p>
             <div className="flex flex-wrap items-center gap-3">
                 <button 
                     onClick={handleStartSubmission}
-                    className="px-7 py-3 bg-[#F24C20] rounded-2xl font-bold hover:scale-105 transition-all shadow-xl shadow-[#F24C20]/20"
+                    className="px-6 py-2 bg-[#F24C20] rounded-xl text-sm font-bold hover:scale-105 transition-all shadow-xl shadow-[#F24C20]/20"
                 >
                     Submit Your Idea
                 </button>
