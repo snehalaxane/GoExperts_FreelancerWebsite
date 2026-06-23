@@ -351,7 +351,7 @@ export default function StartupCreatorDashboard() {
         {/* --- SECTION: OVERVIEW --- */}
         {activeMenuId === 'overview' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-500">
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <StatCard label="Live pitches" value={stats.totalIdeas.toString()} icon={Lightbulb} trend="+1 this week" />
                     <StatCard label="Approved Decks" value={stats.approved.toString()} icon={CheckCircle} />
                     <StatCard label="Investor Leads" value={stats.investorLeads.toString()} icon={Users} trend="+3 interests" />
@@ -362,7 +362,7 @@ export default function StartupCreatorDashboard() {
                     {/* Ideas Gallery */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center justify-between">
-                            <h3 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Current Portfolios</h3>
+                            <h3 className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Current Portfolios</h3>
                             <button onClick={() => handleNav('ideas')} className="text-sm font-bold text-[#F24C20] hover:underline">Manage All</button>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-4">
@@ -379,7 +379,7 @@ export default function StartupCreatorDashboard() {
                     {/* Leads & Meetings Side */}
                     <div className="space-y-6">
                          <div className="flex items-center justify-between">
-                            <h3 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Upcoming</h3>
+                            <h3 className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Upcoming</h3>
                             <button onClick={() => handleNav('meetings')} className="text-sm font-bold text-[#F24C20] hover:underline">Calendar</button>
                         </div>
                         <div className={`rounded-3xl border p-4 space-y-3 ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-white border-neutral-100'}`}>
@@ -437,8 +437,8 @@ export default function StartupCreatorDashboard() {
                     <>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h2 className={`text-2xl sm:text-3xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Pitch Collection</h2>
-                                <p className="text-xs sm:text-sm font-bold text-neutral-500 uppercase tracking-widest mt-1">Manage, Edit and Track your startup ideas.</p>
+                                <h2 className={`text-xl sm:text-lg font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Pitch Collection</h2>
+                                <p className="mt-1 text-xs sm:text-sm ${isDarkMode ? 'text-neutral-500' : 'text-neutral-500">Manage, Edit and Track your startup ideas.</p>
                             </div>
                         </div>
 
@@ -464,7 +464,7 @@ export default function StartupCreatorDashboard() {
                                 <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-xl sm:rounded-[2rem] bg-neutral-900 flex items-center justify-center group-hover:bg-[#F24C20] group-hover:rotate-12 transition-all mb-4 sm:mb-6" >
                                     <Plus className="w-6 h-6 sm:w-10 sm:h-10 text-neutral-400 group-hover:text-white" />
                                 </div>
-                                <span className="text-xs sm:text-base font-black text-neutral-500 group-hover:text-[#F24C20] uppercase tracking-widest">New Presentation</span>
+                                <span className="text-xs sm:text-sm font-black text-neutral-500 group-hover:text-[#F24C20] uppercase tracking-widest">New Presentation</span>
                             </button>
                         </div>
                     </>
@@ -474,14 +474,14 @@ export default function StartupCreatorDashboard() {
 
         {/* --- SECTION: ANALYTICS --- */}
         {activeMenuId === 'analytics' && (
-             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <h2 className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Traction Metrics</h2>
+             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <h2 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Traction Metrics</h2>
                 <div className="grid lg:grid-cols-3 gap-8">
-                    <div className={`lg:col-span-2 rounded-[3.5rem] border p-12 flex flex-col items-center justify-center min-h-[400px] ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-white border-neutral-100'}`}>
-                        <div className="p-8 rounded-full bg-blue-500/10 mb-8 animate-pulse">
-                            <TrendingUp className="w-20 h-20 text-blue-500" />
+                    <div className={`lg:col-span-2 rounded-[3.5rem] border p-2 flex flex-col items-center justify-center min-h-[400px] ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-white border-neutral-100'}`}>
+                        <div className="p-4 rounded-full bg-blue-500/10 mb-4 animate-pulse">
+                            <TrendingUp className="w-4 h-4 text-blue-500" />
                         </div>
-                        <h4 className={`text-2xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Visual Insights Coming Soon</h4>
+                        <h4 className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Visual Insights Coming Soon</h4>
                         <p className="mt-4 text-neutral-500 font-bold max-w-sm text-center uppercase tracking-widest text-xs">
                             We are integrating interactive charts to help you visualize investor behavior.
                         </p>
@@ -489,16 +489,16 @@ export default function StartupCreatorDashboard() {
                     <div className="space-y-6">
                          <div className={`p-8 rounded-[3rem] border ${isDarkMode ? 'bg-[#F24C20]/10 border-[#F24C20]/30' : 'bg-orange-50 border-orange-200'}`}>
                             <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#F24C20] mb-4">Top Performing Pitch</h5>
-                            <h3 className={`text-2xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{ideas[0] ? getIdeaTitle(ideas[0]) : 'N/A'}</h3>
+                            <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{ideas[0] ? getIdeaTitle(ideas[0]) : 'N/A'}</h3>
                             <div className="mt-6 flex items-center gap-6">
                                 <div>
-                                    <span className="text-[8px] font-black uppercase text-neutral-500">Total Views</span>
+                                    <span className="text-[12px] font-black uppercase text-neutral-500">Total Views</span>
                                     <span className={`block text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{ideas[0]?.views || 0}</span>
                                 </div>
                                 <div className={`w-px h-8 ${isDarkMode ? 'bg-neutral-800' : 'bg-orange-200'}`} />
                                 <div>
-                                    <span className="text-[8px] font-black uppercase text-neutral-500">C-Rate</span>
-                                    <span className={`block text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>4.2%</span>
+                                    <span className="text-[12px] font-black uppercase text-neutral-500">C-Rate</span>
+                                    <span className={`block text-lg font-medium ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>4.2%</span>
                                 </div>
                             </div>
                          </div>
@@ -509,44 +509,51 @@ export default function StartupCreatorDashboard() {
 
         {/* --- SECTION: MESSAGES --- */}
         {activeMenuId === 'messages' && (
-            <div className="flex flex-col md:flex-row h-[80vh] md:h-[75vh] rounded-[2rem] sm:rounded-[3.5rem] border overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700 bg-black/20 backdrop-blur-3xl border-neutral-800 relative">
+            <div className={`flex flex-col md:flex-row h-[80vh] md:h-[75vh] rounded-xl sm:rounded-2xl border overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700 ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-white border-neutral-300'} relative`}>
                 {/* Conversations Sidebar */}
-                <div className={`w-full md:w-80 lg:w-96 border-r border-neutral-800 flex flex-col ${selectedConversation ? 'hidden md:flex' : 'flex'}`}>
-                    <div className="p-6 sm:p-8 border-b border-neutral-800">
-                        <h3 className="text-xl sm:text-2xl font-black text-white italic tracking-tighter">Founder Inbox</h3>
+                <div className={`w-full md:w-80 lg:w-[22rem] border-r ${isDarkMode ? 'border-neutral-800' : 'border-neutral-300'} flex flex-col ${selectedConversation ? 'hidden md:flex' : 'flex'}`}>
+                    <div className={`p-4 sm:p-5 border-b ${isDarkMode ? 'border-neutral-800' : 'border-neutral-300'}`}>
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                            <input 
+                                type="text"
+                                placeholder="Search messages..."
+                                className={`w-full pl-11 pr-4 py-3 rounded-xl text-sm font-medium outline-none transition-all ${isDarkMode ? 'bg-neutral-800/50 border border-neutral-700 text-white placeholder:text-neutral-500 focus:border-[#F24C20]' : 'bg-[#FFF5EC] border border-[#F2C9A7] text-neutral-900 placeholder:text-neutral-500 focus:border-[#F24C20]'}`}
+                            />
+                        </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
                         {conversations.length > 0 ? conversations.map(conv => (
                             <div 
                                 key={conv.user?._id || conv._id} 
                                 onClick={() => setSelectedConversation(conv)}
-                                className={`p-4 rounded-3xl flex items-center gap-4 cursor-pointer transition-all border ${
+                                className={`p-4 rounded-xl flex items-center gap-4 cursor-pointer transition-all border ${
                                     selectedConversation?.user?._id === conv.user?._id 
-                                    ? 'bg-[#F24C20]/10 border-[#F24C20]/30 shadow-lg shadow-[#F24C20]/5' 
-                                    : 'hover:bg-neutral-800 border-transparent'
+                                    ? (isDarkMode ? 'bg-[#F24C20]/10 border-[#F24C20]/30 shadow-sm' : 'bg-[#FFF5EC] border-[#F2C9A7] shadow-sm')
+                                    : (isDarkMode ? 'hover:bg-neutral-800 border-transparent' : 'hover:bg-neutral-50 border-transparent')
                                 }`}
                             >
                                 <div className="relative flex-shrink-0">
-                                    <div className="w-12 h-12 rounded-2xl bg-neutral-700 overflow-hidden ring-2 ring-neutral-800">
+                                    <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden ring-2 ring-transparent">
                                          <img src={conv.user?.profile_image || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100"} alt="" className="w-full h-full object-cover" />
                                     </div>
-                                    {conv.unreadCount > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#F24C20] rounded-full ring-4 ring-neutral-900 shadow-xl" />}
+                                    {conv.unreadCount > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#F24C20] rounded-full ring-2 ring-white dark:ring-neutral-900 shadow-sm" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-0.5">
-                                        <span className={`text-sm font-black truncate ${selectedConversation?.user?._id === conv.user?._id ? 'text-[#F24C20]' : 'text-white'}`}>{conv.user?.full_name}</span>
+                                        <span className={`text-sm font-bold truncate ${selectedConversation?.user?._id === conv.user?._id ? 'text-[#F24C20]' : (isDarkMode ? 'text-white' : 'text-neutral-900')}`}>{conv.user?.full_name}</span>
                                     </div>
-                                    <p className="text-[10px] font-bold text-neutral-500 truncate uppercase tracking-tight">{conv.lastMessage?.content}</p>
+                                    <p className="text-xs font-medium text-neutral-500 truncate">{conv.lastMessage?.content || "No messages yet."}</p>
                                 </div>
                             </div>
                         )) : (
-                            <div className="py-20 text-center text-neutral-500 italic text-sm">No conversations yet.</div>
+                            <div className="py-12 text-center text-neutral-400 italic text-[13px] font-bold">No conversations found</div>
                         )}
                     </div>
                 </div>
 
                 {/* Chat Area */}
-                <div className={`flex-1 flex flex-col h-full bg-neutral-900/60 transition-all ${selectedConversation ? 'flex' : 'hidden md:flex'}`}>
+                <div className={`flex-1 flex flex-col h-full transition-all ${isDarkMode ? 'bg-neutral-900/20' : 'bg-transparent'} ${selectedConversation ? 'flex' : 'hidden md:flex'}`}>
                     {selectedConversation ? (
                         <ChatWindow 
                             otherUser={selectedConversation.user} 
@@ -554,12 +561,12 @@ export default function StartupCreatorDashboard() {
                         />
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 sm:p-12">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[2rem] bg-neutral-800 flex items-center justify-center mb-8 rotate-3 shadow-2xl">
-                                <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-600 -rotate-3" />
+                            <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center mb-6 transition-all ${isDarkMode ? 'bg-[#F24C20]/10' : 'bg-[#FFF5EC]'}`}>
+                                <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#F24C20]" />
                             </div>
-                            <h4 className="text-xl sm:text-2xl font-black text-white italic tracking-tighter">Engage with Investors</h4>
-                            <p className="mt-3 text-[10px] sm:text-sm font-bold text-neutral-500 max-w-sm uppercase tracking-[0.2em] leading-relaxed">
-                                Negotiate terms and secure your funding. Select a thread to start chatting.
+                            <h4 className={`text-xl sm:text-2xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>Your Inbox</h4>
+                            <p className="mt-3 text-[13px] sm:text-sm font-medium text-neutral-600 max-w-[280px] leading-relaxed">
+                                Select an active conversation to start collaborating with experts or clients.
                             </p>
                         </div>
                     )}

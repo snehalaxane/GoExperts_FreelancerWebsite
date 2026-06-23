@@ -296,7 +296,7 @@ export default function SubscriptionCredits() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-[#111111]">
+            <h1 className="text-lg font-bold text-[#111111]">
               Subscription & Credits
             </h1>
             <p className="mt-1 text-md text-[#4a4a4a]">

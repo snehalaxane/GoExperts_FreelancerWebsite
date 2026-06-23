@@ -314,7 +314,7 @@ export default function ProjectDetails() {
   const canSeeFullDetails = isUnlocked || isOwner || isHired;
 
   return (
-    <div className={`min-h-screen pt-5 lg:pt-40 pb-12 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+    <div className={`min-h-screen pt-5 lg:pt-8 pb-12 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Main Content */}
@@ -370,7 +370,7 @@ export default function ProjectDetails() {
                     </span>
                     <span className={`text-[10px] lg:text-sm ${isDarkMode ? 'text-neutral-400' : 'text-[#7a5a49]'}`}>{project.postedTime}</span>
                   </div>
-                  <h1 className={`text-2xl lg:text-2xl font-bold mb-4 line-clamp-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                  <h1 className={`text-xl lg:text-lg font-bold mb-4 line-clamp-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
                     {project.title}
                   </h1>
                   <div className={`flex flex-wrap items-center gap-4 ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>
@@ -472,7 +472,7 @@ export default function ProjectDetails() {
                             </div>
 
                             <div className="p-3 lg:p-4 bg-black/40 rounded-xl border border-neutral-800">
-                               <p className="text-[11px] lg:text-sm text-neutral-400 italic leading-relaxed">"{prop.message}"</p>
+                               <p className="text-[11px] lg:text-sm text-neutral-400 leading-relaxed">"{prop.message}"</p>
                             </div>
 
                             <div className="flex gap-2">

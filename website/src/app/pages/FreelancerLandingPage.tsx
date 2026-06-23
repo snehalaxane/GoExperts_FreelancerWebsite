@@ -303,7 +303,7 @@ export default function FreelancerLandingPage() {
           <section
             id="home"
             ref={el => { sectionRefs.current['home'] = el; }}
-            className="relative min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] w-full overflow-hidden"
+            className="relative w-full overflow-hidden"
           >
               <div className="fixed top-0 left-0 w-full h-full bg-[#fdf7f2] z-[-2]" />
               <div
@@ -323,7 +323,7 @@ export default function FreelancerLandingPage() {
                 }}
               />
 
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-6 pb-32 lg:pt-8 lg:pb-20 min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] flex items-start">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20 pt-6 pb-16 lg:pt-8 lg:pb-16 flex items-start">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(180px,288px)_56px_minmax(0,1fr)] items-center gap-6 lg:gap-8 xl:gap-10 pr-0 lg:pr-24">
                   <div className="w-full flex justify-center lg:justify-start z-10 order-1">
                     <div className="relative w-52 h-64 sm:w-60 sm:h-72 lg:w-72 lg:h-80 overflow-hidden rounded-[2.5rem] shadow-2xl bg-white border-4 border-white">
@@ -391,10 +391,10 @@ export default function FreelancerLandingPage() {
                       </div>
                     </div>
 
-                    <h1 className="flex flex-col mb-4 lg:mb-6">
-                      <span className="text-lg sm:text-xl lg:text-4xl font-black text-[#1f120d] uppercase tracking-widest mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-4">
-                        <span className="w-10 h-[4px] bg-[#F24C20]" />
-                        I'm <span className="text-[#F24C20]">{talent.full_name}.</span>
+                    <h1 className="flex flex-col mb-4 lg:mb-4">
+                      <span className="text-lg sm:text-xl lg:text-4xl font-black text-[#1f120d] uppercase tracking-widest mb-3 lg:mb-4 flex items-center justify-start gap-2 lg:gap-4">
+                        <span className="w-10 h-[4px] bg-[#F24C20] shrink-0" />
+                        <span>I'm <span className="text-[#F24C20]">{talent.full_name}.</span></span>
                       </span>
                       <span className="text-4xl sm:text-5xl lg:text-xl font-black uppercase text-[#1f120d] leading-[1.05] break-words">
                         {talent.role_title || 'Expert Professional'}
@@ -439,14 +439,14 @@ export default function FreelancerLandingPage() {
           <section
             id="about"
             ref={el => { sectionRefs.current['about'] = el; }}
-            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
+            className="max-w-7xl mx-auto px-6 pt-10 pb-12 lg:py-20 text-[#1f120d]"
           >
-              <div className="text-center mb-20 relative">
+              <div className="text-center mb-8 lg:mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Shortly</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">About <span className="text-[#F24C20]">Me</span></h3>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-8 lg:mb-24">
                 <div>
                   <h4 className="text-2xl font-bold mb-8 uppercase tracking-widest">Personal Information</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 text-gray-900 font-bold">
@@ -496,8 +496,8 @@ export default function FreelancerLandingPage() {
 
               {/* Skills Section */}
               {talent.skills?.length > 0 && (
-                <div className="mb-24">
-                  <h4 className="text-2xl font-bold mb-12 text-center uppercase tracking-widest">My Skills</h4>
+                <div className="mb-8 lg:mb-24">
+                  <h4 className="text-2xl font-bold mb-6 lg:mb-12 text-center uppercase tracking-widest">My Skills</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     {talent.skills.slice(0, 8).map((skill: any, i: number) => (
                       <div key={i} className="flex flex-col items-center">
@@ -512,10 +512,10 @@ export default function FreelancerLandingPage() {
               )}
 
               {/* Timeline */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                 <div>
-                  <h4 className="text-2xl font-bold mb-12 uppercase tracking-widest">Experience</h4>
-                  <div className="space-y-12 border-l border-[#f2d7c2] pl-8 relative">
+                  <h4 className="text-2xl font-bold mb-6 lg:mb-12 uppercase tracking-widest">Experience</h4>
+                  <div className="space-y-8 lg:space-y-12 border-l border-[#f2d7c2] pl-8 relative">
                     {talent.experience_details?.length > 0 ? talent.experience_details.map((exp: any, i: number) => (
                       <div key={i} className="relative">
                         <div className="absolute -left-[41px] top-0 w-10 h-10 rounded-full bg-[#F24C20] flex items-center justify-center">
@@ -536,8 +536,8 @@ export default function FreelancerLandingPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-2xl font-bold mb-12 uppercase tracking-widest">Education</h4>
-                  <div className="space-y-12 border-l border-[#f2d7c2] pl-8 relative">
+                  <h4 className="text-2xl font-bold mb-6 lg:mb-12 uppercase tracking-widest">Education</h4>
+                  <div className="space-y-8 lg:space-y-12 border-l border-[#f2d7c2] pl-8 relative">
                     {talent.education_details?.length > 0 ? talent.education_details.map((edu: any, i: number) => (
                       <div key={i} className="relative">
                         <div className="absolute -left-[41px] top-0 w-10 h-10 rounded-full bg-[#F24C20] flex items-center justify-center">
@@ -563,9 +563,9 @@ export default function FreelancerLandingPage() {
           <section
             id="portfolio"
             ref={el => { sectionRefs.current['portfolio'] = el; }}
-            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-20 text-[#1f120d]"
+            className="max-w-7xl mx-auto px-6 pt-10 pb-12 lg:py-20 text-[#1f120d]"
           >
-              <div className="text-center mb-20 relative">
+              <div className="text-center mb-8 lg:mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Works</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">My <span className="text-[#F24C20]">Portfolio</span></h3>
               </div>
@@ -662,9 +662,9 @@ export default function FreelancerLandingPage() {
           <section
             id="contact"
             ref={el => { sectionRefs.current['contact'] = el; }}
-            className="max-w-7xl mx-auto px-6 pt-20 pb-32 lg:py-10 text-[#1f120d]"
+            className="max-w-7xl mx-auto px-6 pt-10 pb-20 lg:py-10 text-[#1f120d]"
           >
-              <div className="text-center mb-20 relative">
+              <div className="text-center mb-8 lg:mb-20 relative">
                 <h2 className="text-6xl lg:text-9xl font-black text-[#f4c7ae] uppercase select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">Contact</h2>
                 <h3 className="text-4xl lg:text-5xl font-black uppercase relative z-10">Get In <span className="text-[#F24C20]">Touch With Talent</span></h3>
               </div>
@@ -681,7 +681,7 @@ export default function FreelancerLandingPage() {
                       </div>
                       <div>
                         <div className="text-xs uppercase text-[#7a5a49] tracking-widest mb-1">Mail Me</div>
-                        <div className="font-bold text-lg">
+                        <div className="font-bold text-sm">
                           {isUnlocked ? (talent.email || 'Contact via Platform') : maskedEmail}
                         </div>
                       </div>
@@ -692,7 +692,7 @@ export default function FreelancerLandingPage() {
                       </div>
                       <div>
                         <div className="text-xs uppercase text-[#7a5a49] tracking-widest mb-1">Location</div>
-                        <div className="font-bold text-lg">{talent.location || 'Remote, World'}</div>
+                        <div className="font-bold text-sm">{talent.location || 'Remote, World'}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-5">
@@ -701,7 +701,7 @@ export default function FreelancerLandingPage() {
                       </div>
                       <div>
                         <div className="text-xs uppercase text-[#7a5a49] tracking-widest mb-1">Response Time</div>
-                        <div className="font-bold text-lg">Within 24 Hours</div>
+                        <div className="font-bold text-sm">Within 24 Hours</div>
                       </div>
                     </div>
                   </div>
@@ -771,15 +771,15 @@ export default function FreelancerLandingPage() {
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                           className="w-full bg-white border border-[#f2d7c2] rounded-[2rem] px-8 py-5 text-sm text-[#1f120d] placeholder:text-[#8b6b5a] focus:border-[#F24C20] focus:ring-1 focus:ring-[#F24C20] outline-none transition-all h-44 resize-none shadow-sm" required></textarea>
                       </div>
-                      <div className="md:col-span-2">
+                      <div className="md:col-span-2 flex justify-end">
                         <button
                           type="submit"
                           disabled={isSending}
-                          className="group px-10 py-2 bg-[#F24C20] text-white rounded-full font-bold uppercase tracking-widest text-sm flex items-center gap-4 hover:bg-white hover:text-black transition-all disabled:opacity-50"
+                          className="group px-10 py-2 bg-[#F24C20] text-white rounded-full font-bold uppercase tracking-widest text-sm flex items-center gap-4 hover:bg-[#F24C20] hover:text-white transition-all disabled:opacity-50"
                         >
                           {isSending ? 'Sending...' : 'Send Message'}
-                          <div className="w-10 h-10 bg-black/10 rounded-full flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
-                            <Send className="w-5 h-5" />
+                          <div className="w-10 h-10 bg-black/10 rounded-full flex items-center justify-center group-hover:bg-[#F24C20] transition-all">
+                            <Send className="w-5 h-5 text-white" />
                           </div>
                         </button>
                       </div>

@@ -293,14 +293,14 @@ export default function Wallet() {
       </motion.div>
 
       {/* Profile + Balance Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         {/* Profile Info Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`p-6 rounded-3xl border ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} shadow-xl`}
+          className={`p-5 rounded-3xl border ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} shadow-xl`}
         >
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-2">
             <div className="w-14 h-14 rounded-2xl bg-[#F24C20]/10 flex items-center justify-center flex-shrink-0">
               <User className="w-7 h-7 text-[#F24C20]" />
             </div>
@@ -309,12 +309,12 @@ export default function Wallet() {
               <div className="text-xs text-[#4a4a4a] uppercase tracking-widest font-semibold">Account Profile</div>
             </div>
           </div>
-          <div className="space-y-3">
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-neutral-800/60' : 'bg-neutral-50'}`}>
+          <div className="space-y-2">
+            <div className={`flex items-center gap-3 p-2.5 rounded-xl ${isDarkMode ? 'bg-neutral-800/60' : 'bg-neutral-50'}`}>
               <Mail className="w-4 h-4 text-[#F24C20] flex-shrink-0" />
               <span className="truncate text-sm text-[#4a4a4a]">{email || '-'}</span>
             </div>
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-neutral-800/60' : 'bg-neutral-50'}`}>
+            <div className={`flex items-center gap-3 p-2.5 rounded-xl ${isDarkMode ? 'bg-neutral-800/60' : 'bg-neutral-50'}`}>
               <Phone className="w-4 h-4 text-[#F24C20] flex-shrink-0" />
               <span className="text-sm text-[#4a4a4a]">{phone || 'Not provided'}</span>
             </div>
@@ -326,18 +326,18 @@ export default function Wallet() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.05 }}
-          className={`relative overflow-hidden p-8 rounded-3xl border ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} shadow-xl`}
+          className={`relative overflow-hidden p-5 rounded-3xl border ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'} shadow-xl`}
         >
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <WalletIcon className="w-32 h-32 text-[#F24C20]" />
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <WalletIcon className="w-24 h-24 text-[#F24C20]" />
           </div>
           <div className="relative z-10">
-            <div className="text-sm uppercase tracking-widest font-bold text-[#4a4a4a] mb-2">Wallet Balance</div>
-            <div className="text-5xl font-black text-[#111111] mb-8 flex items-baseline gap-2">
-              <span className="text-2xl text-[#F24C20]">₹</span>
+            <div className="text-sm uppercase tracking-widest font-bold text-[#4a4a4a] mb-1">Wallet Balance</div>
+            <div className="text-4xl font-black text-[#111111] mb-4 flex items-baseline gap-2">
+              <span className="text-xl text-[#F24C20]">₹</span>
               <CountUp end={balance} />
             </div>
-            <div className="flex items-center gap-6 pt-6 border-t border-neutral-800/10">
+            <div className="flex items-center gap-6 pt-4 border-t border-neutral-800/10">
               <div>
                 <div className="text-xs text-[#4a4a4a] font-medium">Pending Payouts</div>
                 <div className="font-bold text-orange-500">{withdrawals.filter(w => w.status === 'pending').reduce((acc, w) => acc + w.amount, 0).toLocaleString()}</div>
@@ -353,10 +353,10 @@ export default function Wallet() {
         {/* Referral Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
-          className={`p-6 rounded-3xl border bg-gradient-to-br ${isDarkMode ? 'from-orange-500/10 to-transparent border-orange-500/20' : 'from-orange-50/50 to-transparent border-orange-100'}`}
+          className={`p-5 rounded-3xl border bg-gradient-to-br ${isDarkMode ? 'from-orange-500/10 to-transparent border-orange-500/20' : 'from-orange-50/50 to-transparent border-orange-100'}`}
         >
           <h2 className="mb-1 text-lg font-bold text-[#111111]">Refer & Earn ₹{referralReward}</h2>
-          <p className="mb-4 text-xs leading-relaxed text-[#4a4a4a]">
+          <p className="mb-3 text-xs leading-relaxed text-[#4a4a4a]">
             Earn <b>₹{referralReward}</b> when your referral buys their first paid plan.
           </p>
           <div className="space-y-2">
@@ -464,7 +464,7 @@ export default function Wallet() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className={`lg:col-span-2 p-8 rounded-3xl border ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'}`}
         >
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-orange-500/10"><ArrowDownToLine className="w-6 h-6 text-orange-500" /></div>
             <h2 className="text-xl font-bold text-[#111111]">Withdraw Funds</h2>
           </div>
@@ -559,9 +559,9 @@ export default function Wallet() {
               <button
                 onClick={handleWithdraw}
                 disabled={submitting || !withdrawAmount || Number(withdrawAmount) < minWithdrawal}
-                className="w-full md:w-auto px-3 py-3 bg-[#F24C20] hover:bg-orange-600 text-white rounded-2xl font-black text-lg transition-all shadow-xl shadow-orange-500/20 disabled:opacity-50 disabled:grayscale"
+                className="w-full md:w-auto px-3 py-3 bg-[#F24C20] hover:bg-orange-600 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-orange-500/20 disabled:opacity-50 disabled:grayscale"
               >
-                {submitting ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'Confirm Withdrawal'}
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirm Withdrawal'}
               </button>
             </div>
           </div>

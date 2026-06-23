@@ -318,8 +318,28 @@ export default function Settings() {
         };
       });
 
+      // Map experience_details frontend fields to backend schema fields
+      const mappedExperience = (formData.experience_details || []).map((exp: any) => {
+        const { start, end, isCurrent } = parseYearRange(exp.year_range);
+        // Convert "Month YYYY" label to a Date string the backend can parse
+        const toDateStr = (label: string) => {
+          if (!label) return undefined;
+          const monthVal = labelToMonthInput(label); // gives "YYYY-MM"
+          return monthVal ? `${monthVal}-01` : undefined;
+        };
+        return {
+          company: exp.company,
+          position: exp.position || exp.title || '',
+          description: exp.description,
+          start_date: toDateStr(start),
+          end_date: isCurrent ? undefined : toDateStr(end),
+          is_current: isCurrent,
+        };
+      });
+
       const finalFormData = {
         ...formData,
+        experience_details: mappedExperience,
         business_or_alternative_number: formData.business_or_alternative_number || formData.whatsapp_number,
         business_or_alternative_country_code: formData.business_or_alternative_number 
           ? formData.business_or_alternative_country_code 
@@ -620,7 +640,7 @@ export default function Settings() {
   return (
     <div className="space-y-6 pb-12 text-[#111111]">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="px-1 md:px-0">
-        <h1 className="text-2xl md:text-2xl font-bold text-[#111111]">Settings</h1>
+        <h1 className="text-xl md:text-xl font-bold text-[#111111]">Settings</h1>
         <p className="mt-1 md:mt-2 text-md text-[#4a4a4a]">Manage your account settings and preferences</p>
       </motion.div>
 
@@ -660,7 +680,7 @@ export default function Settings() {
             <div className="space-y-8">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className={`text-[#000000] text-xl md:text-2xl font-bold`}>My Portfolio Projects</h2>
+                  <h2 className={`text-[#000000] text-xl md:text-xl font-bold`}>My Portfolio Projects</h2>
                   <p className="text-xs md:text-sm !text-[#4a4a4a] mt-1">Showcase your best work and completed projects.</p>
                 </div>
                 <button onClick={handleAddProject} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-[#F24C20] text-white rounded-lg hover:bg-orange-600 transition-colors">
@@ -792,7 +812,7 @@ export default function Settings() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold !text-[#111111]">Work Experience</h2>
+                    <h2 className="text-xl font-bold !text-[#111111]">Work Experience</h2>
                     <p className="text-sm !text-[#4a4a4a] mt-1">Add your professional career history.</p>
                   </div>
                   <button onClick={handleAddExperience} className="flex items-center gap-2 px-4 py-2 bg-[#F24C20] text-white rounded-lg hover:bg-orange-600 transition-colors">
@@ -955,16 +975,16 @@ export default function Settings() {
           {activeTab === 'landing' && (
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl font-bold text-[#111111]">Landing Page Branding</h2>
+                <h2 className="text-xl font-bold text-[#111111]">Landing Page Branding</h2>
                 <p className="text-sm text-[#4a4a4a] mt-1">Customize your public profile page's appearance.</p>
               </div>
 
-              <div className="p-8 rounded-2xl border border-neutral-200 bg-white">
+              <div className="p-4 rounded-2xl border border-neutral-200 bg-white">
                 <label className="block text-sm font-bold mb-4 uppercase tracking-wider text-[#4a4a4a]">Cover / Hero Image</label>
-                <div className="relative group aspect-[21/9] w-full rounded-2xl overflow-hidden border-2 border-dashed border-[#f2c9a7] bg-[#fffaf4]">
+                <div className="relative group aspect-[51/9] w-full rounded-2xl overflow-hidden border-2 border-dashed border-[#f2c9a7] bg-[#fffaf4]">
                   <img src={landingImagePreview || getImgUrl(formData.landing_page_image) || 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Landing Cover" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-  <label className="px-6 py-3 bg-white !text-[#111111] rounded-xl font-bold cursor-pointer transition-colors flex items-center gap-2">
+  <label className="px-3 py-3 bg-white !text-[#111111] rounded-xl font-bold cursor-pointer transition-colors flex items-center gap-2">
     <Camera className="w-5 h-5" />
     Change Hero Image
     <input
@@ -999,9 +1019,9 @@ export default function Settings() {
           )}
 
           {activeTab === 'verification' && (
-            <div className="space-y-8">
+            <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-bold text-[#111111]">Verification & KYC</h2>
+                <h2 className="text-lg font-bold text-[#111111]">Verification & KYC</h2>
                 <p className="text-sm text-[#4a4a4a] mt-1">Complete your identity verification to unlock full platform features.</p>
               </div>
 
@@ -1028,7 +1048,7 @@ export default function Settings() {
                           <label className="block text-xs font-bold mb-2 uppercase text-[#4a4a4a]">PAN Card</label>
                           <div className="relative p-4 rounded-xl border-2 border-dashed border-[#f2c9a7] bg-[#fffaf4]">
                             {formData.kyc_details.pan_card ? (
-                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Document Uploaded</span><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.kyc_details.pan_card), title: 'PAN Card' })} className="text-blue-500 text-xs font-bold hover:underline">View</button></div>
+                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Document Uploaded</span><div className="flex items-center gap-3"><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.kyc_details.pan_card), title: 'PAN Card' })} className="text-blue-500 text-xs font-bold hover:underline">View</button><button type="button" onClick={() => setFormData({ ...formData, kyc_details: { ...formData.kyc_details, pan_card: '' } })} className="text-red-500 text-xs font-bold hover:underline">Remove</button></div></div>
                             ) : (
                               <div className="flex flex-col items-center py-4 text-center"><Upload className="w-8 h-8 text-[#6b625b] mb-2" /><input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files?.[0] && handleFileUpload('pan_card', e.target.files[0])} /><p className="text-xs text-[#4a4a4a]">Upload PAN Card Image/PDF</p></div>
                             )}
@@ -1038,7 +1058,7 @@ export default function Settings() {
                           <label className="block text-xs font-bold mb-2 uppercase text-[#4a4a4a]">Aadhar Card</label>
                           <div className="relative p-4 rounded-xl border-2 border-dashed border-[#f2c9a7] bg-[#fffaf4]">
                             {formData.kyc_details.aadhar_card ? (
-                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Document Uploaded</span><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.kyc_details.aadhar_card), title: 'Aadhar Card' })} className="text-blue-500 text-xs font-bold hover:underline">View</button></div>
+                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Document Uploaded</span><div className="flex items-center gap-3"><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.kyc_details.aadhar_card), title: 'Aadhar Card' })} className="text-blue-500 text-xs font-bold hover:underline">View</button><button type="button" onClick={() => setFormData({ ...formData, kyc_details: { ...formData.kyc_details, aadhar_card: '' } })} className="text-red-500 text-xs font-bold hover:underline">Remove</button></div></div>
                             ) : (
                               <div className="flex flex-col items-center py-4 text-center"><Upload className="w-8 h-8 text-[#6b625b] mb-2" /><input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files?.[0] && handleFileUpload('aadhar_card', e.target.files[0])} /><p className="text-xs text-[#4a4a4a]">Upload Aadhar Card Image/PDF</p></div>
                             )}
@@ -1054,7 +1074,7 @@ export default function Settings() {
                           <label className="block text-xs font-bold mb-2 uppercase text-[#4a4a4a]">Experience Letter / Relieving Letter</label>
                           <div className="relative p-4 rounded-xl border-2 border-dashed border-[#f2c9a7] bg-[#fffaf4]">
                             {formData.documents.experience_letter ? (
-                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Letter Uploaded</span><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.documents.experience_letter), title: 'Experience Letter' })} className="text-blue-500 text-xs font-bold hover:underline">View</button></div>
+                              <div className="flex justify-between items-center"><span className="text-xs font-medium text-[#111111]">Letter Uploaded</span><div className="flex items-center gap-3"><button type="button" onClick={() => setPreviewDocument({ url: getDocumentUrl(formData.documents.experience_letter), title: 'Experience Letter' })} className="text-blue-500 text-xs font-bold hover:underline">View</button><button type="button" onClick={() => setFormData({ ...formData, documents: { ...formData.documents, experience_letter: '' } })} className="text-red-500 text-xs font-bold hover:underline">Remove</button></div></div>
                             ) : (
                               <div className="flex flex-col items-center py-4 text-center"><Upload className="w-8 h-8 text-[#6b625b] mb-2" /><input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => e.target.files?.[0] && handleFileUpload('experience_letter', e.target.files[0])} /><p className="text-xs text-[#4a4a4a]">Upload Professional Proof</p></div>
                             )}
@@ -1092,7 +1112,7 @@ export default function Settings() {
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold mb-2">Security Settings</h2>
+                <h2 className="text-xl font-bold mb-2">Security Settings</h2>
                     <p className="text-sm !text-[#4a4a4a]">Manage your password and account protection</p>
               </div>
               <div className={`p-8 rounded-2xl border backdrop-blur-sm ${isDarkMode ? 'bg-neutral-800/20 border-neutral-700' : 'bg-neutral-50 border-neutral-200'}`}>
@@ -1115,7 +1135,7 @@ export default function Settings() {
           {activeTab === 'privacy' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold mb-2 text-red-600">Danger Zone</h2>
+                <h2 className="text-xl font-bold mb-2 text-red-600">Danger Zone</h2>
                 <p className="text-sm !text-[#4a4a4a]">Handle sensitive account data</p>
               </div>
               <div className="p-6 rounded-xl border border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30 flex items-start gap-4">
@@ -1131,7 +1151,7 @@ export default function Settings() {
 
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold mb-6 text-[#111111]">Profile Settings</h2>
+              <h2 className="text-xl font-bold mb-6 text-[#111111]">Profile Settings</h2>
               <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                 <div className="relative group">
                   <img src={getImgUrl(formData.profile_image) || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80"} className="w-24 h-24 rounded-full object-cover border-2 border-[#F24C20]/30" alt="Profile" />
@@ -1301,9 +1321,11 @@ export default function Settings() {
                 </div>
 
 
-                <button type="submit" disabled={isSaving} className="w-full sm:w-auto px-4 py-4 bg-[#044071] !text-white rounded-xl font-bold hover:bg-[#055a99] disabled:opacity-50 transition-all shadow-lg shadow-[#044071]/20">
-                  {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Profile Changes'}
-                </button>
+                <div className="flex justify-end">
+                  <button type="submit" disabled={isSaving} className="w-full sm:w-auto px-6 py-3 bg-[#044071] !text-white rounded-xl font-bold hover:bg-[#055a99] disabled:opacity-50 transition-all shadow-lg shadow-[#044071]/20">
+                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Profile Changes'}
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -1311,9 +1333,36 @@ export default function Settings() {
           <AnimatePresence>
             {previewDocument && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onClick={() => setPreviewDocument(null)}>
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`relative w-full max-w-5xl h-[80vh] rounded-2xl border overflow-hidden ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'}`} onClick={e => e.stopPropagation()}>
-                  <div className="flex items-center justify-between p-4 border-b border-neutral-800"><h3 className="font-bold !text-[#111111]">{previewDocument.title}</h3><button onClick={() => setPreviewDocument(null)}><X /></button></div>
-                  {isPdfDocument(previewDocument.url) ? <iframe src={previewDocument.url} className="w-full h-full" /> : <img src={previewDocument.url} className="w-full h-full object-contain" />}
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`relative w-full max-w-lg h-[55vh] rounded-2xl border flex flex-col overflow-hidden ${isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'}`} onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between p-4 border-b border-neutral-200 shrink-0">
+                    <h3 className="font-bold !text-[#111111]">{previewDocument.title}</h3>
+                    <div className="flex items-center gap-3">
+                      <a href={previewDocument.url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-600 hover:underline">Open in new tab ↗</a>
+                      <button onClick={() => setPreviewDocument(null)} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><X className="w-5 h-5" /></button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    {isPdfDocument(previewDocument.url) ? (
+                      <iframe src={previewDocument.url} className="w-full h-full border-0" title={previewDocument.title} />
+                    ) : (
+                      <img
+                        src={previewDocument.url}
+                        alt={previewDocument.title}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<div class="flex flex-col items-center justify-center h-full gap-4 text-neutral-500">
+                              <p class="font-bold text-sm">Unable to preview this document.</p>
+                              <a href="${previewDocument.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-bold text-sm underline">Click here to open it directly ↗</a>
+                            </div>`;
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
                 </motion.div>
               </motion.div>
             )}

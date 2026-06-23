@@ -96,7 +96,7 @@ export default function FindTalent() {
             <Users className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-[10px] sm:text-sm font-bold tracking-wider uppercase">Talent Pool</span>
           </div>
-          <h1 className={`text-2xl sm:text-3xl md:text-4xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>
+          <h1 className={`text-2xl sm:text-3xl md:text-xl font-black ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>
             {userType === 'freelancer' ? 'Expert Networking' : 'Find Talent'}
           </h1>
           <p className={`mt-2 text-sm sm:text-base max-w-xl ${isDarkMode ? 'text-neutral-400' : 'text-neutral-600'}`}>
@@ -129,8 +129,8 @@ export default function FindTalent() {
               isFilterOpen 
                 ? 'bg-[#F24C20] border-[#F24C20] text-white' 
                 : isDarkMode 
-                  ? 'bg-neutral-900/50 border-neutral-800 text-neutral-400 hover:text-white' 
-                  : 'bg-white border-neutral-200 text-neutral-600 hover:text-neutral-900'
+                  ? 'bg-neutral-900/50 border-neutral-800 text-neutral-400 hover:text-gray-900' 
+                  : 'bg-white border-neutral-200 text-neutral-600 hover:text-gray-900'
             }`}
           >
             <SlidersHorizontal className="w-5 h-5" />
@@ -270,7 +270,7 @@ export default function FindTalent() {
                     to={`/f/${talent.username || talent._id}`}
                     className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
                       isDarkMode 
-                        ? 'bg-neutral-800 text-white hover:bg-[#F24C20]' 
+                        ? 'bg-orange-400 text-white hover:bg-[#F24C20]' 
                         : 'bg-neutral-100 text-neutral-900 hover:bg-[#F24C20] hover:text-white'
                     }`}
                   >

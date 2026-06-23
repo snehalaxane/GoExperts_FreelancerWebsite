@@ -400,6 +400,7 @@ function InputField({ label, value, onChange, icon: Icon, placeholder = "", type
                 </div>
                 <input 
                     type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+                    max={type === 'date' ? '9999-12-31' : undefined}
                     className={`w-full bg-neutral-900 border-2 ${error ? 'border-red-500/50 focus:border-red-500' : 'border-neutral-800 focus:border-[#F24C20]'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white outline-none transition-all placeholder:text-neutral-700`}
                     style={{ colorScheme: 'dark' }}
                 />
@@ -449,17 +450,18 @@ function UploadField({ label, value, onUpload, icon: Icon }: any) {
 }
 
 function Checkbox({ label, checked, onChange }: any) {
+    const { isDarkMode } = useTheme();
     return (
-        <label className="flex items-start gap-4 cursor-pointer group">
+        <label className="flex items-center gap-4 cursor-pointer group">
             <div 
                 onClick={() => onChange(!checked)}
-                className={`mt-1 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center transition-all ${
                     checked ? 'bg-[#F24C20] shadow-lg shadow-[#F24C20]/20' : 'bg-neutral-800 border-2 border-neutral-700'
                 }`}
             >
                 {checked && <CheckCircle2 className="w-4 h-4 text-white" />}
             </div>
-            <span className={`text-xs font-bold leading-relaxed transition-colors ${checked ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-400'}`}>
+            <span className="text-xs font-bold leading-relaxed transition-colors text-neutral-500 group-hover:text-neutral-400">
                 {label}
             </span>
         </label>
@@ -467,11 +469,12 @@ function Checkbox({ label, checked, onChange }: any) {
 }
 
 function NavButton({ label, onClick, icon: Icon, ghost = false }: any) {
+    const { isDarkMode } = useTheme();
     return (
         <button 
             onClick={onClick}
             className={`flex items-center gap-2 rounded-2xl px-8 py-3.5 font-black text-xs uppercase tracking-widest transition-all ${
-                ghost ? 'bg-transparent text-neutral-500 hover:text-white hover:bg-neutral-800' : 'bg-[#F24C20] text-white hover:bg-[#d43d16] shadow-xl shadow-[#F24C20]/20'
+                ghost ? `bg-transparent text-neutral-500 ${isDarkMode ? 'hover:bg-orange-500/10 hover:text-orange-500' : 'hover:bg-orange-50 hover:text-orange-600'} hover:-translate-x-1` : 'bg-[#F24C20] text-white hover:bg-[#d43d16] shadow-xl shadow-[#F24C20]/20 hover:scale-105 active:scale-95'
             }`}
         >
             {!ghost && label}

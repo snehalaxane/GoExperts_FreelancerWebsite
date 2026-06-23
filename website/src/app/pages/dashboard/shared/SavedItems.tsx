@@ -354,13 +354,13 @@ export default function SavedItems() {
           )}
 
           {loading === false && ((activeTab === 'talents' && savedTalents.length === 0) || (activeTab === 'gigs' && savedGigs.length === 0) || (activeTab === 'ideas' && savedIdeas.length === 0) || (activeTab === 'projects' && savedProjects.length === 0)) && (
-            <div className="rounded-[4rem] border-2 border-dashed border-neutral-200 bg-neutral-50/50 p-20 text-center">
-              <div className="w-24 h-24 bg-neutral-800/10 rounded-[3rem] flex items-center justify-center mx-auto mb-8">
-                {activeTab === 'talents' ? <Users className="w-12 h-12 text-neutral-500" /> : activeTab === 'gigs' ? <Package className="w-12 h-12 text-neutral-500" /> : activeTab === 'ideas' ? <Bookmark className="w-12 h-12 text-neutral-500" /> : <Briefcase className="w-12 h-12 text-neutral-500" />}
+            <div className="rounded-[4rem] border-2 border-dashed border-neutral-200 bg-neutral-50/50 p-5 text-center">
+              <div className="w-14 h-14 bg-neutral-800/10 rounded-[3rem] flex items-center justify-center mx-auto mb-4">
+                {activeTab === 'talents' ? <Users className="w-10 h-10 text-neutral-500" /> : activeTab === 'gigs' ? <Package className="w-12 h-12 text-neutral-500" /> : activeTab === 'ideas' ? <Bookmark className="w-12 h-12 text-neutral-500" /> : <Briefcase className="w-12 h-12 text-neutral-500" />}
               </div>
-              <h3 className="mb-3 text-xl font-black text-[#111111]">Collection Empty</h3>
+              <h3 className="mb-3 text-lg font-black text-[#111111]">Collection Empty</h3>
               <p className="mx-auto max-w-md text-md text-[#4a4a4a]">You haven't added any {activeTab} to your personal collection yet. Start exploring to curate your dashboard.</p>
-              <button onClick={() => navigate('/')} className="mt-10 px-3 py-3 bg-[#F24C20] text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl shadow-[#F24C20]/20">Explore Marketplace</button>
+              <button onClick={() => navigate('/')} className="mt-2 px-3 py-3 bg-[#F24C20] text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl shadow-[#F24C20]/20">Explore Marketplace</button>
             </div>
           )}
         </motion.div>

@@ -181,7 +181,7 @@ export default function ExploreStartupIdeas() {
       {/* Mobile Header with Filter Toggle */}
       <div className="lg:hidden flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">Venture Marketplace</h1>
+          <h1 className="text-lg font-black tracking-tight">Venture Marketplace</h1>
           <p className="text-xs text-neutral-500">Discover disruptive startups</p>
         </div>
         <button 
@@ -325,44 +325,7 @@ export default function ExploreStartupIdeas() {
               <p className={`mt-1 text-xs font-black uppercase tracking-widest ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>Discover disruptive startups</p>
            </div>
            
-           {/* Dynamic Sliding Marquee */}
-           <div className={`flex-1 overflow-hidden relative rounded-2xl border h-14 flex items-center ${isDarkMode ? 'bg-neutral-900/30 border-neutral-800' : 'bg-neutral-50 border-neutral-100'}`}>
-              <div className="absolute left-0 top-0 bottom-0 px-3 bg-[#F24C20] text-white flex items-center z-10 skew-x-[-12deg] -ml-2">
-                 <div className="skew-x-[12deg] flex items-center gap-2">
-                    <Rocket className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-tighter">PULSE</span>
-                 </div>
-              </div>
-              <div className="flex w-full overflow-hidden ml-16">
-                 <motion.div 
-                   animate={{ x: ["100%", "-200%"] }}
-                   transition={{ 
-                     repeat: Infinity, 
-                     duration: 30, 
-                     ease: "linear" 
-                   }}
-                   className="flex items-center gap-12 whitespace-nowrap"
-                 >
-                    {ideas.length > 0 ? ideas.slice(0, 5).map((idea, i) => (
-                      <div key={idea._id || i} className="flex items-center gap-3">
-                         <span className="w-1.5 h-1.5 rounded-full bg-[#F24C20]" />
-                         <span className={`text-[11px] font-black uppercase tracking-wider ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{idea.title}</span>
-                         <span className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-bold text-[#F24C20] uppercase">{getCategoryLabel(idea.category) || 'Tech'}</span>
-                      </div>
-                    )) : (
-                      <span className="text-xs text-neutral-500 font-bold uppercase tracking-widest">Awaiting new venture submissions...</span>
-                    )}
-                    {/* Duplicate for seamless loop if enough items */}
-                    {ideas.length > 2 && ideas.slice(0, 5).map((idea, i) => (
-                      <div key={`dup-${idea._id || i}`} className="flex items-center gap-3">
-                         <span className="w-1.5 h-1.5 rounded-full bg-[#F24C20]" />
-                         <span className={`text-[11px] font-black uppercase tracking-wider ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{idea.title}</span>
-                         <span className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-bold text-[#F24C20] uppercase">{getCategoryLabel(idea.category) || 'Tech'}</span>
-                      </div>
-                    ))}
-                 </motion.div>
-              </div>
-           </div>
+         
         </header>
 
         {loading ? (
@@ -379,8 +342,8 @@ export default function ExploreStartupIdeas() {
               const isUnlocked = idea.contacts?.some((c: any) => (c._id || c) === user._id) || idea.isUnlocked;
               
               const stats = [
-                { label: 'Views', value: idea.views || '0', color: 'text-white' },
-                { label: 'Saves', value: idea.saves || '0', color: 'text-rose-500' },
+                { label: 'Views', value: idea.views || '0', color: 'text-rose-500' },
+                { label: 'Saves', value: idea.saves || '0', color: 'text-yellow-500' },
                 { label: 'Contacts', value: idea.contacts?.length || '0', color: 'text-[#F24C20]' }
               ];
 
@@ -390,11 +353,7 @@ export default function ExploreStartupIdeas() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className={`group relative flex flex-col rounded-[2.5rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-[#F24C20]/10 ${
-                    isDarkMode 
-                    ? 'bg-[#0b0d14] border-white/10 hover:border-[#F24C20]/50 shadow-black' 
-                    : 'bg-white border-gray-100 hover:bg-gray-50'
-                  }`}
+                  className="group relative flex flex-col rounded-[2.5rem] border border-gray-200 bg-white hover:bg-gray-50 transition-all duration-500 hover:shadow-2xl hover:shadow-[#F24C20]/10"
                 >
                   {/* Card Aura Background */}
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#F24C20]/5 to-transparent rounded-b-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -407,55 +366,55 @@ export default function ExploreStartupIdeas() {
                             {getCategoryLabel(idea.category) || 'Tech'}
                           </span>
                           {(isOwner || isUnlocked) && (
-                            <span className="px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded-xl flex items-center gap-1.5 animate-in fade-in zoom-in duration-500">
+                            <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-xl flex items-center gap-1.5 animate-in fade-in zoom-in duration-500">
                                <ShieldCheck className="w-3 h-3" />
                                {isOwner ? 'Your Venture' : 'Unlocked'}
                             </span>
                           )}
                           {!isOwner && !isUnlocked && (
-                             <span className="px-3 py-1.5 bg-white/5 border border-white/10 text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-xl">
+                             <span className="px-3 mr-2 py-1.5 bg-neutral-100 border border-neutral-200 text-neutral-800 text-[9px] font-black uppercase tracking-widest rounded-xl">
                                 {idea.stage || 'Market MVP'}
                              </span>
                           )}
                         </div>
-                      <button className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group/heart">
-                        <Heart className="w-4 h-4 text-slate-500 group-hover/heart:text-rose-500 transition-colors" />
+                      <button className="p-3 bg-neutral-50 border border-neutral-200 rounded-2xl hover:bg-neutral-100 transition-colors group/heart">
+                        <Heart className="w-4 h-4 text-slate-400 group-hover/heart:text-rose-500 transition-colors" />
                       </button>
                     </div>
 
-                    <h3 className="text-2xl font-black text-white mb-4 leading-tight tracking-tight group-hover:text-[#F24C20] transition-colors leading-relaxed line-clamp-2">
+                    <h3 className="text-2xl font-black text-gray-600 mb-4 leading-tight tracking-tight group-hover:text-[#F24C20] transition-colors leading-relaxed line-clamp-2">
                       “{idea.title}”
                     </h3>
                     
-                    <p className="text-sm text-slate-400 leading-relaxed line-clamp-2 mb-8 font-medium">
+                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-8 font-medium">
                       {idea.shortDescription}
                     </p>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-3 mb-8">
                        {stats.map((stat, i) => (
-                         <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
-                            <div className={`text-lg font-black ${stat.color}`}>{stat.value}</div>
-                            <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{stat.label}</div>
+                         <div key={i} className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center">
+                            <div className={`text-lg font-gray-900 font-bold ${stat.color}`}>{stat.value}</div>
+                            <div className="text-[9px] font-bold text-gray-800 uppercase tracking-widest mt-0.5">{stat.label}</div>
                          </div>
                        ))}
                     </div>
 
                     {/* Specialist Badges */}
-                    <div className="flex flex-wrap gap-2 mb-8">
+                    <div className="flex flex-wrap gap-2 mb-1">
                        {normalizeStringArray(idea.neededRoles || ['Product Designer', 'Growth Marketer', 'Industry Advisor']).slice(0, 3).map((role: string, i: number) => (
-                         <span key={i} className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-xl text-[9px] font-black text-slate-300 uppercase tracking-tighter">
+                         <span key={i} className="px-3 py-1.5 bg-white border border-neutral-200 shadow-sm rounded-xl text-[9px] font-black text-neutral-600 uppercase tracking-tighter">
                             {role}
                          </span>
                        ))}
                     </div>
                   </div>
 
-                  <div className="mt-auto p-8 pt-0 border-t border-white/5 bg-white/5">
+                  <div className="mt-auto p-8 pt-0 border-t border-neutral-100 bg-neutral-50/50">
                     <div className="flex items-center justify-between mt-6">
                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-white leading-none mb-1">{idea.creator?.full_name || 'Anonymous Founder'}</span>
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">{idea.creator?.location || 'Bengaluru, India'} • <span className="text-emerald-500 italic lowercase tracking-tight">online now</span></span>
+                          <span className="text-sm font-black text-neutral-900 leading-none mb-1">{idea.creator?.full_name || 'Anonymous Founder'}</span>
+                          <span className="text-[10px] font-bold text-neutral-500 uppercase">{idea.creator?.location || 'Bengaluru, India'} • <span className="text-emerald-500 italic lowercase tracking-tight">online now</span></span>
                        </div>
                        <button 
                           onClick={() => handleDeepDiveClick(idea)}
