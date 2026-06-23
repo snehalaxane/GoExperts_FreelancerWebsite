@@ -1,0 +1,161 @@
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import PremiumDashboardLayout from '@/app/components/dashboard/PremiumDashboardLayout';
+import RoleSwitcher from '@/app/components/dashboard/RoleSwitcher';
+import QuickActionMenu from '@/app/components/dashboard/QuickActionMenu';
+import api from '@/app/utils/api';
+import { toast } from 'sonner';
+
+// Client Pages
+import ClientDashboardHome from '@/app/pages/dashboard/client/ClientDashboardHome';
+import ExploreProjects from '@/app/pages/dashboard/client/ExploreProjects';
+import CreateProject from '@/app/pages/dashboard/client/CreateProject';
+import FindTalent from '@/app/pages/dashboard/client/FindTalent';
+
+// Freelancer Pages
+import FreelancerDashboardHome from '@/app/pages/dashboard/freelancer/FreelancerDashboardHome';
+import FindClients from '@/app/pages/dashboard/freelancer/FindClients';
+// import MyGigs from '@/app/pages/dashboard/freelancer/MyGigs';
+// Shared Pages
+import MyProjects from '@/app/pages/dashboard/shared/MyProjects';
+import StartupIdeas from '@/app/pages/dashboard/shared/StartupIdeas';
+import Disputes from '@/app/pages/dashboard/shared/Disputes';
+import Invoices from '@/app/pages/dashboard/shared/Invoices';
+import SavedItems from '@/app/pages/dashboard/shared/SavedItems';
+import Messages from '@/app/pages/dashboard/shared/Messages';
+import Wallet from '@/app/pages/dashboard/shared/Wallet';
+import SubscriptionCredits from '@/app/pages/dashboard/shared/SubscriptionCredits';
+import Settings from '@/app/pages/dashboard/shared/Settings';
+import ExploreStartupIdeas from './shared/ExploreStartupIdeas';
+import StartupIdeaDashboardDetail from './shared/StartupIdeaDashboardDetail';
+import ProjectDetails from '@/app/pages/ProjectDetails';
+// import GigDetails from '@/app/pages/GigDetails';
+import TalentProfile from '@/app/pages/TalentProfile';
+// import CreateGig from '@/app/pages/dashboard/freelancer/CreateGig';
+// import EditGig from '@/app/pages/dashboard/freelancer/EditGig';
+
+export default function DashboardRouter() {
+  const [userType, setUserType] = useState<'client' | 'freelancer'>('client');
+  const navigate = useNavigate();
+
+  const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const storedUserType = localStorage.getItem('userType') as 'client' | 'freelancer' | null;
+    if (storedUserType) {
+      setUserType(storedUserType);
+    }
+    fetchUserRoles();
+  }, []);
+
+  const fetchUserRoles = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      if (res.data.success) {
+        setAllowedRoles(res.data.user.roles || []);
+      }
+    } catch (err) {
+      console.error('Error fetching user roles:', err);
+    }
+  };
+
+  const handleRoleSwitch = (role: 'client' | 'freelancer') => {
+    if (!allowedRoles.includes(role)) {
+      toast.error(`Access to ${role} dashboard requires a plan upgrade.`, {
+        action: {
+          label: 'View Plans',
+          onClick: () => navigate(`/dashboard/subscription?role=${role}`)
+        },
+        duration: 5000
+      });
+      return;
+    }
+    setUserType(role);
+    localStorage.setItem('userType', role);
+    // Navigate to dashboard home when switching roles
+    navigate('/dashboard');
+  };
+
+  return (
+    <>
+      <PremiumDashboardLayout userType={userType}>
+        <Routes>
+          {/* Dashboard Home */}
+          <Route
+            index
+            element={
+              userType === 'client' ? <ClientDashboardHome /> : <FreelancerDashboardHome />
+            }
+          />
+
+          {/* Projects */}
+          <Route path="projects" element={<Navigate to="/dashboard/projects/my-projects" replace />} />
+          <Route path="projects/explore" element={<Navigate to="/dashboard/projects/my-projects" replace />} />
+          <Route path="projects/my-projects" element={<MyProjects />} />
+
+          {/* Create Project (Client + Freelancer) */}
+          <Route
+            path="projects/create"
+            element={(userType === 'client' || userType === 'freelancer') ? <CreateProject /> : <Navigate to="/dashboard" />}
+          />
+          <Route
+            path="projects/edit/:id"
+            element={(userType === 'client' || userType === 'freelancer') ? <CreateProject /> : <Navigate to="/dashboard" />}
+          />
+
+          {/* Gigs */}
+          {/* <Route path="gigs/orders" element={<GigOrders />} />
+          <Route path="gigs/find" element={<FindGigs />} /> */}
+
+          {/* My Gigs (Freelancer Only) */}
+          {/* <Route 
+            path="gigs/my-gigs" 
+            element={userType === 'freelancer' ? <MyGigs /> : <Navigate to="/dashboard" />} 
+          /> */}
+
+          {/* Talent/Clients */}
+          <Route
+            path="talent"
+            element={<FindTalent />}
+          />
+          <Route
+            path="clients"
+            element={userType === 'freelancer' ? <FindClients /> : <Navigate to="/dashboard" />}
+          />
+
+          {/* Wallet & Withdraw (Freelancer Only) */}
+          {/* Wallet & Referrals */}
+          <Route path="wallet" element={<Wallet />} />
+          <Route path="balance" element={<Wallet />} />
+
+          {/* Startup Ideas - Personal Pitches Only */}
+          <Route path="startup-ideas" element={<StartupIdeas />} />
+          {/* Marketplace Access Restricted To Investors */}
+
+          {/* Shared Pages */}
+
+          <Route path="disputes" element={<Disputes />} />
+          <Route path="invoices" element={<Invoices />} />
+          <Route path="saved" element={<SavedItems />} />
+          <Route path="messages" element={<Messages />} />
+
+          <Route path="subscription" element={<SubscriptionCredits />} />
+          <Route path="settings" element={<Settings />} />
+
+          {/* Details Pages */}
+          <Route path="projects/:id" element={<ProjectDetails />} />
+          {/* <Route path="gigs/create" element={<CreateGig />} />
+          <Route path="gigs/edit/:id" element={<EditGig />} />
+          <Route path="gigs/:id" element={<GigDetails />} /> */}
+          <Route path="talent/:id" element={<TalentProfile />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </PremiumDashboardLayout>
+
+      {/* Quick Action Menu (Left Bottom) */}
+      <QuickActionMenu userType={userType} />
+    </>
+  );
+}

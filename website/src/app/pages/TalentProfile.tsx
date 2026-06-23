@@ -1,0 +1,614 @@
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'motion/react';
+import {
+  Star,
+  MapPin,
+  CheckCircle,
+  Briefcase,
+  Clock,
+  IndianRupee,
+  MessageCircle,
+  Bookmark,
+  Award,
+  Loader2,
+  AlertCircle,
+  Link as LinkIcon,
+  ExternalLink,
+  ArrowLeft
+} from 'lucide-react';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { getImgUrl } from '@/app/utils/api';
+import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
+import { useTheme } from '@/app/components/ThemeProvider';
+import api from '@/app/utils/api';
+import { toast } from 'sonner';
+import { CreditUnlockModal } from '@/app/components/subscription/CreditUnlockModal';
+import { Lock } from 'lucide-react';
+
+export default function TalentProfile() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
+  const [activeTab, setActiveTab] = useState('about');
+  const [saved, setSaved] = useState(false);
+  const [talent, setTalent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [myRating, setMyRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+  const resolvedTalentId = talent?._id || id;
+
+  useEffect(() => {
+    fetchTalentDetails();
+    checkIfUnlocked();
+    fetchCurrentUser();
+  }, [id]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get('/auth/me', { skipAuthRedirect: true, skipToast: true } as any);
+      if (res.data.success) setCurrentUser(res.data.user);
+    } catch {
+      // not logged in – ok
+    }
+  };
+
+  const fetchReviews = useCallback(async () => {
+    if (!resolvedTalentId) return;
+    setReviewsLoading(true);
+    try {
+      const res = await api.get(`/reviews/${resolvedTalentId}`);
+      if (res.data.success) {
+        setReviews(res.data.data);
+        setAvgRating(res.data.average);
+        setReviewCount(res.data.count);
+      }
+    } catch {
+      /* silent */
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [resolvedTalentId]);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') fetchReviews();
+  }, [activeTab, fetchReviews]);
+
+  useEffect(() => {
+    if (!talent) return;
+
+    const title = talent.meta_title || `${talent.full_name} | Go Experts`;
+    const description = talent.meta_description || talent.bio || `View ${talent.full_name}'s profile on Go Experts.`;
+    const keywords = talent.meta_keywords || [talent.full_name, talent.role, 'Go Experts'].filter(Boolean).join(', ');
+
+    document.title = title;
+
+    const setMeta = (name: string, content: string) => {
+      let tag = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.name = name;
+        document.head.appendChild(tag);
+      }
+      tag.content = content;
+    };
+
+    setMeta('description', description);
+    setMeta('keywords', keywords);
+  }, [talent]);
+
+  const handleSubmitReview = async () => {
+    if (!myRating) return toast.error('Please select a star rating');
+    if (!currentUser) return toast.error('Please sign in to leave a review');
+    if (!resolvedTalentId) return toast.error('Invalid freelancer profile');
+    setSubmittingReview(true);
+    try {
+      await api.post(`/reviews/${resolvedTalentId}`, { rating: myRating, comment: reviewComment });
+      toast.success('Review submitted!');
+      setMyRating(0);
+      setReviewComment('');
+      fetchReviews();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const checkIfUnlocked = async () => {
+    if (!id || id === 'undefined' || id.length < 12) return;
+    try {
+      const res = await api.get(`/subscription/is-unlocked/${id}`, { skipAuthRedirect: true, skipToast: true } as any);
+      if (res.data.success && res.data.isUnlocked) {
+        setIsUnlocked(true);
+      }
+    } catch (err: any) {
+      console.error('Error checking unlock status:', err);
+      if (err.response?.status === 401) {
+        toast.error('Please register or sign in to review portfolio');
+        navigate('/signin');
+      }
+    }
+  };
+
+  const fetchTalentDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.get(`/users/freelancers/${id}`);
+      if (res.data.success) {
+        // Enhance with mock data for fields not in backend yet
+        const data = res.data.data;
+        setTalent({
+          ...data,
+          rating: data.review_score > 0 ? data.review_score : 'New',
+          reviewCount: data.review_count || 0,
+          totalOrders: data.total_orders || 0,
+          responseTime: data.response_time || '1 hour',
+          availability: data.availability || 'Available',
+          whyHireMe: data.why_hire_me || [
+            'Professional approach to every project',
+            'Strong communication skills',
+            'Fast turnaround and quality delivery',
+            '100% satisfaction guaranteed'
+          ],
+          workProcess: data.work_process || [
+            { step: 1, title: 'Discovery', description: 'Understanding project requirements and goals.' },
+            { step: 2, title: 'Execution', description: 'Working on the design/development with updates.' },
+            { step: 3, title: 'Review', description: 'Collecting feedback and making necessary revisions.' }
+          ],
+          portfolio: data.portfolio || [],
+          gigs: []
+        });
+      }
+    } catch (err: any) {
+      console.error('Error fetching talent details:', err);
+      setError(err.response?.data?.message || 'Failed to load talent profile');
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!talent?._id) return;
+    const checkUnlockByResolvedId = async () => {
+      try {
+        const res = await api.get(`/subscription/is-unlocked/${talent._id}`, { skipAuthRedirect: true, skipToast: true } as any);
+        if (res.data.success && res.data.isUnlocked) {
+          setIsUnlocked(true);
+        }
+      } catch {
+        // silent on public page
+      }
+    };
+    checkUnlockByResolvedId();
+  }, [talent?._id]);
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+        <Loader2 className="w-12 h-12 text-[#F24C20] animate-spin mb-4" />
+        <p className={isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}>Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error || !talent) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+        <h2 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>Error</h2>
+        <p className={`mb-6 ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>{error || 'Profile not found'}</p>
+        <Link to="/talent" className="px-6 py-3 bg-[#F24C20] text-white rounded-lg font-bold">
+          Back to Talent
+        </Link>
+      </div>
+    );
+  }
+
+  const tabs = [
+    { id: 'about', label: 'About' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'portfolio', label: 'Portfolio' },
+    { id: 'qualification', label: 'Qualification' },
+    { id: 'reviews', label: 'Reviews' },
+  ];
+
+  return (
+    <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+      {/* Hero Cover Section */}
+      <div className={`relative h-80 overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800' : 'bg-gradient-to-br from-[#fff7ef] via-[#fffaf5] to-[#fdebdc]'}`}>
+        <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-t from-neutral-950 via-neutral-900/50 to-transparent' : 'bg-gradient-to-t from-[#fdf7f2] via-white/40 to-transparent'}`} />
+        <div className={`absolute inset-x-0 bottom-0 h-40 ${isDarkMode ? 'bg-gradient-to-t from-neutral-950 to-transparent' : 'bg-gradient-to-t from-[#fdf7f2] to-transparent'}`} />
+        
+        {/* Back Button */}
+        <div className="absolute top-8 left-6 z-20">
+          <button
+            onClick={() => navigate('/talent')}
+            className={`flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-xl font-bold transition-all group ${
+              isDarkMode
+                ? 'bg-black/30 border border-white/10 text-white hover:bg-black/50'
+                : 'bg-white/85 border border-[#f2c9ae] text-[#2b160e] hover:bg-white'
+            }`}
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            Back to Talent Pool
+          </button>
+        </div>
+      </div>
+
+      {/* Profile Header */}
+      <div className="relative max-w-7xl mx-auto px-6 -mt-32">
+        <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
+          {/* Avatar Area */}
+          <div className="relative group">
+            <div className={`w-48 h-48 rounded-3xl overflow-hidden shadow-2xl relative z-10 ${isDarkMode ? 'border-8 border-neutral-950' : 'border-8 border-white'}`}>
+              <ImageWithFallback
+                src={getImgUrl(talent.profile_image) || `https://ui-avatars.com/api/?name=${talent.full_name}&size=256`}
+                alt={talent.full_name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </div>
+            <div className={`absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center z-20 shadow-lg ${isDarkMode ? 'border-4 border-neutral-950' : 'border-4 border-white'}`}>
+              <CheckCircle className="w-6 h-6 text-white" />
+            </div>
+          </div>
+
+          {/* User Info Card */}
+          <div className={`flex-1 w-full backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl ${
+            isDarkMode
+              ? 'bg-neutral-900/60 border border-white/5'
+              : 'bg-white/90 border border-[#f2d7c2]'
+          }`}>
+            <div className="flex flex-col lg:flex-row justify-between gap-6">
+              <div>
+                <h1 className={`text-4xl md:text-5xl font-bold mb-2 flex items-center gap-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                  {talent.full_name}
+                  {talent.kyc_details?.is_verified && (
+                    <span className="px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold rounded-lg border border-green-500/20">Verified</span>
+                  )}
+                </h1>
+                <p className={`text-xl font-medium mb-4 capitalize ${isDarkMode ? 'text-neutral-400' : 'text-[#f24c20]'}`}>{talent.role || 'Professional Expert'}</p>
+
+                <div className={`flex flex-wrap items-center gap-6 ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-xl ${isDarkMode ? 'bg-white/5 border border-white/10' : 'bg-[#fff7ef] border border-[#f3d6be]'}`}>
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-bold">{talent.rating}</span>
+                    <span className={isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}>({talent.reviewCount} reviews)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#F24C20]" />
+                    <span>Remote, World</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => {
+                    if (!isUnlocked) {
+                      setShowUnlockModal(true);
+                    } else {
+                      navigate(`/dashboard/messages?user=${resolvedTalentId}${localStorage.getItem('userType') === 'client' ? '&intent=hire' : ''}`);
+                    }
+                  }}
+                  className={`flex-1 md:flex-none px-8 py-4 ${isUnlocked ? 'bg-[#F24C20] hover:bg-[#d9431b]' : isDarkMode ? 'bg-neutral-800 hover:bg-neutral-700' : 'bg-[#ffd9bf] hover:bg-[#ffc79f] text-[#2b160e]'} ${isUnlocked ? 'text-white' : isDarkMode ? 'text-white' : 'text-[#2b160e]'} rounded-2xl font-bold transition-all shadow-lg shadow-[#F24C20]/25 transform hover:-translate-y-1 flex items-center justify-center gap-2`}
+                >
+                  {!isUnlocked && <Lock className="w-5 h-5" />}
+                  {localStorage.getItem('userType') === 'freelancer' ? 'Collaborate' : 'Hire Specialist'}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!isUnlocked) {
+                      setShowUnlockModal(true);
+                    } else {
+                      navigate(`/dashboard/messages?user=${resolvedTalentId}`);
+                    }
+                  }}
+                  className={`p-4 ${isUnlocked ? 'bg-[#F24C20]/10 border-[#F24C20] text-[#F24C20]' : isDarkMode ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-[#f3d6be] text-[#2b160e]'} rounded-2xl border transition-all relative group`}
+                >
+                  {!isUnlocked && <div className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-lg"><Lock className="w-2.5 h-2.5" /></div>}
+                  <MessageCircle className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => setSaved(!saved)}
+                  className={`p-4 rounded-2xl border transition-all ${saved ? 'bg-[#F24C20]/10 border-[#F24C20] text-[#F24C20]' : isDarkMode ? 'bg-white/5 border-white/10 text-white hover:border-[#F24C20]' : 'bg-white border-[#f3d6be] text-[#2b160e] hover:border-[#F24C20]'}`}
+                >
+                  <Bookmark className={`w-6 h-6 ${saved ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {[
+            { icon: IndianRupee, label: 'Starts From', value: `₹${talent.hourly_rate || '0'}`, color: 'text-green-400' },
+            { icon: Briefcase, label: 'Experience', value: talent.experience_level || 'Professional', color: 'text-[#F24C20]' },
+            { icon: Clock, label: 'Response', value: talent.responseTime, color: 'text-blue-400' },
+            { icon: Star, label: 'Rating', value: talent.rating, color: 'text-yellow-400' },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className={`p-6 rounded-3xl transition-colors ${isDarkMode ? 'bg-neutral-900/40 border border-white/5 hover:bg-neutral-900/60' : 'bg-white/85 border border-[#f2d7c2] hover:bg-white'}`}
+            >
+              <stat.icon className={`w-6 h-6 ${stat.color} mb-3`} />
+              <div className={`text-sm font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>{stat.label}</div>
+              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{stat.value}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Tab Navigation */}
+        <div className={`flex gap-8 mb-8 overflow-x-auto pb-1 scrollbar-hide ${isDarkMode ? 'border-b border-white/5' : 'border-b border-[#f2d7c2]'}`}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-4 text-sm font-bold transition-all relative ${activeTab === tab.id ? 'text-[#F24C20]' : isDarkMode ? 'text-neutral-500 hover:text-white' : 'text-[#7a5a49] hover:text-[#1f120d]'}`}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-[#F24C20] rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content Rendering */}
+        <div className="pb-24 max-w-4xl">
+          {activeTab === 'about' && (
+            <div className="space-y-12">
+              <section>
+                <h2 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Professional Profile</h2>
+                <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-neutral-400' : 'text-[#3b2418]'}`}>{talent.bio || 'This expert hasn\'t provided a bio yet.'}</p>
+              </section>
+
+              <section className={`p-8 rounded-[2rem] ${isDarkMode ? 'bg-neutral-900/40 border border-white/5' : 'bg-white/85 border border-[#f2d7c2]'}`}>
+                <h3 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Why Hire Me</h3>
+                <div className="grid gap-4">
+                  {talent.whyHireMe.map((item: string, i: number) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      </div>
+                      <span className={isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Work Process</h3>
+                <div className="flex flex-col gap-6">
+                  {talent.workProcess.map((p: any) => (
+                    <div key={p.step} className="flex gap-6">
+                      <div className={`text-4xl font-black select-none ${isDarkMode ? 'text-white/5' : 'text-[#f4c7ae]'}`}>{p.step.toString().padStart(2, '0')}</div>
+                      <div>
+                        <h4 className={`font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-[#2b160e]'}`}>{p.title}</h4>
+                        <p className={isDarkMode ? 'text-neutral-500' : 'text-[#6f5548]'}>{p.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === 'skills' && (
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {talent.skills?.length > 0 ? (
+                talent.skills.map((skill: any) => (
+                      <div key={typeof skill === 'object' ? skill._id : skill} className={`p-4 rounded-2xl flex items-center justify-between ${isDarkMode ? 'bg-white/5 border border-white/10' : 'bg-white border border-[#f2d7c2]'}`}>
+                        <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#2b160e]'}`}>{typeof skill === 'object' ? skill.name : skill}</span>
+                        <Award className="w-5 h-5 text-[#F24C20]" />
+                      </div>
+                ))
+              ) : (
+                <p className={`italic ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>No specific skills listed.</p>
+              )}
+            </section>
+          )}
+
+          {activeTab === 'portfolio' && (
+            <section className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {talent.portfolio?.length > 0 ? (
+                    talent.portfolio.map((item: any, i: number) => (
+                      <div key={i} className={`group relative rounded-[2rem] overflow-hidden border ${isDarkMode ? 'bg-neutral-900 border-white/5' : 'bg-white border-[#f2d7c2]'} shadow-2xl transition-all hover:-translate-y-2`}>
+                        <div className="aspect-[16/10] overflow-hidden relative">
+                          <ImageWithFallback 
+                            src={item.image || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80'} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                            alt={item.title} 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-60" />
+                          
+                          {item.duration_days && (
+                            <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-1.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                              <Clock className="w-3 h-3 text-[#F24C20]" />
+                              {item.duration_days} Days to Complete
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="p-6">
+                          <h4 className={`text-xl font-bold mb-3 group-hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{item.title}</h4>
+                          <p className={`text-sm line-clamp-3 mb-6 leading-relaxed ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>
+                            {item.description || 'Professional execution with high attention to detail and user experience.'}
+                          </p>
+                          
+                          <div className="flex flex-wrap items-center gap-3">
+                            {item.links && item.links.map((link: string, lIdx: number) => (
+                              <a 
+                                key={lIdx}
+                                href={link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-2 px-4 py-2 hover:bg-[#F24C20] rounded-xl text-xs font-bold transition-all group/link ${isDarkMode ? 'bg-white/5 border border-white/10 text-white hover:border-[#F24C20]' : 'bg-[#fff7ef] border border-[#f2d7c2] text-[#2b160e] hover:text-white hover:border-[#F24C20]'}`}
+                              >
+                                 <LinkIcon className="w-3.5 h-3.5" />
+                                 {link.includes('github') ? 'GitHub' : link.includes('behance') ? 'Behance' : 'Live Project'}
+                                 <ExternalLink className="w-3 h-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className={`col-span-2 text-center py-20 rounded-[2.5rem] border border-dashed w-full ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/70 border-[#f2d7c2]'}`}>
+                      <Briefcase className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+                      <p className={`font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>No projects added to the portfolio yet.</p>
+                    </div>
+                  )}
+                </div>
+            </section>
+          )}
+
+          {activeTab === 'qualification' && (
+            <section className="space-y-8">
+              <div className={`p-8 rounded-[2.5rem] ${isDarkMode ? 'bg-neutral-900/40 border border-white/5' : 'bg-white/85 border border-[#f2d7c2]'}`}>
+                <h3 className={`text-xl font-bold mb-6 flex items-center gap-3 ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>
+                  <Award className="w-6 h-6 text-[#F24C20]" />
+                  Educational Credentials
+                </h3>
+                {talent.kyc_details?.is_verified ? (
+                  <div className="flex items-start gap-4 p-6 bg-green-500/5 border border-green-500/20 rounded-2xl">
+                    <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+                    <div>
+                      <p className="font-bold text-green-500">Academic Background Verified</p>
+                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-neutral-400' : 'text-[#5f4a3f]'}`}>This specialist has provided authentic educational documents that have been verified by the GoExperts validation team.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className={`italic ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>Credential verification is currently in progress.</p>
+                )}
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'reviews' && (
+            <section className="space-y-8">
+              {/* Rating Summary */}
+              <div className={`flex items-center gap-8 p-6 rounded-3xl ${isDarkMode ? 'bg-neutral-900/40 border border-white/5' : 'bg-white/85 border border-[#f2d7c2]'}`}>
+                <div className="text-center">
+                  <div className={`text-6xl font-black ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{avgRating > 0 ? avgRating.toFixed(1) : '—'}</div>
+                  <div className="flex justify-center gap-1 mt-2">
+                    {[1,2,3,4,5].map(s => (
+                      <Star key={s} className={`w-5 h-5 ${s <= Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-700'}`} />
+                    ))}
+                  </div>
+                  <div className={`text-sm mt-1 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>{reviewCount} review{reviewCount !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+
+              {/* Submit Review Form (logged-in users only) */}
+              {currentUser && currentUser._id !== resolvedTalentId && (
+                <div className={`p-6 rounded-3xl space-y-4 ${isDarkMode ? 'bg-neutral-900/40 border border-white/5' : 'bg-white/85 border border-[#f2d7c2]'}`}>
+                  <h4 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>Leave a Review</h4>
+                  {/* Star picker */}
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(s => (
+                      <button
+                        key={s}
+                        onMouseEnter={() => setHoverRating(s)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setMyRating(s)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star className={`w-8 h-8 transition-colors ${
+                          s <= (hoverRating || myRating) ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-600'
+                        }`} />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={reviewComment}
+                    onChange={e => setReviewComment(e.target.value)}
+                    placeholder="Share your experience (optional)..."
+                    className={`w-full rounded-2xl px-5 py-4 text-sm resize-none focus:border-[#F24C20] focus:ring-1 focus:ring-[#F24C20] outline-none transition-all h-28 ${isDarkMode ? 'bg-neutral-800 border border-white/10 text-white' : 'bg-white border border-[#f2d7c2] text-[#2b160e]'}`}
+                  />
+                  <button
+                    onClick={handleSubmitReview}
+                    disabled={submittingReview || !myRating}
+                    className="px-8 py-3 bg-[#F24C20] text-white rounded-2xl font-bold text-sm transition-all hover:bg-[#d9431b] disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {submittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </div>
+              )}
+
+              {/* Reviews List */}
+              {reviewsLoading ? (
+                <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 animate-spin text-[#F24C20]" /></div>
+              ) : reviews.length === 0 ? (
+                <div className={`text-center py-12 rounded-3xl ${isDarkMode ? 'bg-neutral-900/20 border border-white/5' : 'bg-white/75 border border-[#f2d7c2]'}`}>
+                  <Star className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
+                  <p className={isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}>No reviews yet. Be the first to review!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review: any) => (
+                    <div key={review._id} className={`p-5 rounded-2xl ${isDarkMode ? 'bg-neutral-900/40 border border-white/5' : 'bg-white/85 border border-[#f2d7c2]'}`}>
+                      <div className="flex items-start gap-4">
+                        <img
+                          src={review.reviewer_id?.profile_image
+                            ? review.reviewer_id.profile_image.startsWith('http')
+                              ? review.reviewer_id.profile_image
+                              : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${review.reviewer_id.profile_image}`
+                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(review.reviewer_id?.full_name || 'User')}&background=random&color=fff&size=48`
+                          }
+                          alt={review.reviewer_id?.full_name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-white/10 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{review.reviewer_id?.full_name || 'Anonymous'}</span>
+                            <span className={`text-xs ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>{new Date(review.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</span>
+                          </div>
+                          <div className="flex gap-1 mt-1 mb-2">
+                            {[1,2,3,4,5].map(s => (
+                              <Star key={s} className={`w-4 h-4 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-700'}`} />
+                            ))}
+                          </div>
+                          {review.comment && <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-neutral-400' : 'text-[#5f4a3f]'}`}>{review.comment}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+      </div>
+
+      <CreditUnlockModal 
+        isOpen={showUnlockModal}
+        onClose={() => setShowUnlockModal(false)}
+        targetId={resolvedTalentId!}
+        targetType="freelancer"
+        onUnlocked={() => {
+          setIsUnlocked(true);
+          fetchTalentDetails();
+        }}
+      />
+    </div>
+  );
+}

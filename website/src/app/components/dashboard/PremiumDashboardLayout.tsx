@@ -1,0 +1,699 @@
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { io, Socket } from 'socket.io-client';
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Briefcase,
+  Users,
+  AlertCircle,
+  FileText,
+  Bookmark,
+  MessageSquare,
+  Wallet,
+  LogOut,
+  Search,
+  Bell,
+  Moon,
+  Sun,
+  Menu,
+  X,
+  ChevronRight,
+  Settings,
+  User as UserIcon,
+  Mail,
+  UserCircle2,
+  Calendar,
+  Crown
+} from 'lucide-react';
+import { useTheme } from '@/app/components/ThemeProvider';
+import { useSiteSettings } from '@/app/context/SiteSettingsContext';
+import api from '@/app/utils/api';
+import { getImgUrl } from '@/app/utils/api';
+import { formatDistanceToNow } from 'date-fns';
+import logoFallback from '@/assets/0772c85ef8b5349a958c92c3b3261c8a881ce229.png';
+
+interface NavItem {
+  label: string;
+  icon: any;
+  path: string;
+  badge?: number;
+  premium?: boolean;
+  submenu?: { label: string; path: string }[];
+}
+
+interface PremiumDashboardLayoutProps {
+  children: React.ReactNode;
+  userType: 'client' | 'freelancer' | 'investor' | 'startup_creator' | 'admin';
+}
+
+export default function PremiumDashboardLayout({ children, userType }: PremiumDashboardLayoutProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { toggleTheme } = useTheme();
+  const isDarkMode = true;
+  const { header_logo, site_logo, site_name } = useSiteSettings();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Dashboard']);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [disputeCount, setDisputeCount] = useState(0);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [incomingMessagePopup, setIncomingMessagePopup] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const getDashboardBase = () => {
+    if (userType === 'investor') return '/dashboard-investor';
+    if (userType === 'startup_creator') return '/dashboard-startup';
+    return '/dashboard';
+  };
+
+  const dashboardBase = getDashboardBase();
+  const logoUrl = getImgUrl(header_logo || site_logo) || logoFallback;
+
+  useEffect(() => {
+    fetchHeaderData();
+  }, [userType]);
+
+  useEffect(() => {
+    const syncUserFromStorage = () => {
+      try {
+        setCurrentUser(JSON.parse(localStorage.getItem('user') || '{}'));
+      } catch {
+        setCurrentUser({});
+      }
+    };
+
+    const refreshCurrentUser = async () => {
+      syncUserFromStorage();
+      try {
+        const res = await api.get('/auth/me', { skipToast: true } as any);
+        if (res.data?.success && res.data.user) {
+          const nextUser = { ...currentUser, ...res.data.user };
+          localStorage.setItem('user', JSON.stringify(nextUser));
+          setCurrentUser(nextUser);
+        }
+      } catch {
+        syncUserFromStorage();
+      }
+    };
+
+    refreshCurrentUser();
+    window.addEventListener('userUpdate', refreshCurrentUser);
+    window.addEventListener('storage', syncUserFromStorage);
+
+    return () => {
+      window.removeEventListener('userUpdate', refreshCurrentUser);
+      window.removeEventListener('storage', syncUserFromStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (notificationsRef.current && !notificationsRef.current.contains(target)) {
+        setShowNotifications(false);
+      }
+
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    const userId = currentUser?._id || currentUser?.id;
+    if (!userId) return;
+
+    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+    setSocket(newSocket);
+    newSocket.emit('register', userId);
+
+    return () => {
+      newSocket.close();
+    };
+  }, [currentUser?._id, currentUser?.id]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (msg: any) => {
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserId = currentUser._id || currentUser.id;
+      const sender = typeof msg.sender === 'string' ? null : msg.sender;
+      const senderId = sender?._id || msg.sender;
+
+      if (!senderId || senderId === currentUserId) return;
+
+      setUnreadMessageCount(prev => prev + 1);
+      setIncomingMessagePopup({
+        id: senderId,
+        name: sender?.full_name || 'New message',
+        message: msg.content || 'Sent you a message',
+        avatar: sender?.profile_image
+          ? (sender.profile_image.startsWith('http')
+            ? sender.profile_image
+            : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${sender.profile_image}`)
+          : null
+      });
+      fetchHeaderData();
+    };
+
+    socket.on('newMessage', handleNewMessage);
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+    };
+  }, [socket, dashboardBase]);
+
+  const fetchHeaderData = async () => {
+    try {
+      const newNotifs: any[] = [];
+
+      const msgRes = await api.get('/messages/conversations');
+      if (msgRes.data.success) {
+        const totalUnread = msgRes.data.data.reduce((sum: number, c: any) => sum + (c.unreadCount || 0), 0);
+        setUnreadMessageCount(totalUnread);
+
+        const unreadMsgs = msgRes.data.data.filter((c: any) => c.unreadCount > 0);
+        newNotifs.push(...unreadMsgs.map((c: any) => ({
+          id: `msg-${c.user._id}`,
+          title: `New message from ${c.user.full_name}`,
+          time: new Date(c.lastMessage.createdAt),
+          path: `${dashboardBase}/messages`
+        })));
+      }
+
+      if (userType === 'freelancer') {
+        const invRes = await api.get('/invitations');
+        if (invRes.data.success) {
+          const pendingInvs = invRes.data.data.filter((i: any) => i.status === 'pending');
+          newNotifs.push(...pendingInvs.map((i: any) => ({
+            id: `inv-${i._id}`,
+            title: `New project invitation`,
+            time: new Date(i.createdAt),
+            path: '/dashboard/clients'
+          })));
+        }
+      }
+
+      // Fetch Disputes for Badge
+      const dispRes = await api.get('/users/my-disputes');
+      if (dispRes.data.success) {
+        const activeDisputesCount = dispRes.data.data.filter((d: any) => d.status === 'open' || d.status === 'under_review').length;
+        setDisputeCount(activeDisputesCount);
+      }
+
+      newNotifs.sort((a, b) => b.time.getTime() - a.time.getTime());
+      setNotifications(newNotifs);
+    } catch (e) {
+      console.log('Error fetching header data', e);
+    }
+  };
+
+  // Navigation items for Client
+  const clientNavItems: NavItem[] = [
+    { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    {
+      label: 'Manage Projects',
+      icon: FolderKanban,
+      path: '/dashboard/projects/my-projects',
+      premium: true,
+      submenu: [
+        { label: 'Create Project', path: '/dashboard/projects/create' },
+        { label: 'My Projects', path: '/dashboard/projects/my-projects' }
+      ]
+    },
+    {
+      label: 'My Startup Pitches',
+      icon: Briefcase,
+      path: '/dashboard/startup-ideas',
+      premium: true,
+      submenu: [
+        { label: 'Submit New Idea', path: '/dashboard/startup-ideas' },
+        // { label: 'My Submissions', path: '/dashboard/startup-ideas' }
+      ]
+    },
+    { label: 'Disputes', icon: AlertCircle, path: '/dashboard/disputes', badge: disputeCount > 0 ? disputeCount : undefined },
+    { label: 'Saved Items', icon: Bookmark, path: '/dashboard/saved' },
+    { label: 'Messages', icon: MessageSquare, path: '/dashboard/messages', badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
+    { label: 'Earnings & Referrals', icon: Wallet, path: '/dashboard/wallet', premium: true },
+    { label: 'Subscription', icon: UserCircle2, path: '/dashboard/subscription' },
+    { label: 'Settings', icon: Settings, path: '/dashboard/settings' }
+  ];
+
+  // Navigation items for Freelancer
+  const freelancerNavItems: NavItem[] = [
+    { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    // {
+    //   label: 'Find Experts',
+    //   icon: Users,
+    //   path: '/dashboard/talent'
+    // },
+    {
+      label: 'Manage Projects',
+      icon: FolderKanban,
+      path: '/dashboard/projects/my-projects',
+      premium: true,
+      submenu: [
+        { label: 'My Projects', path: '/dashboard/projects/my-projects' }
+      ]
+    },
+    {
+      label: 'My Startup Pitches',
+      icon: Briefcase,
+      path: '/dashboard/startup-ideas',
+      premium: true,
+      submenu: [
+        { label: 'Submit New Idea', path: '/dashboard/startup-ideas' },
+        // { label: 'My Submissions', path: '/dashboard/startup-ideas' }
+      ]
+    },
+    { label: 'Disputes', icon: AlertCircle, path: '/dashboard/disputes', badge: disputeCount > 0 ? disputeCount : undefined },
+    { label: 'Saved Items', icon: Bookmark, path: '/dashboard/saved' },
+    { label: 'Messages', icon: MessageSquare, path: '/dashboard/messages', badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
+    { label: 'Earnings & Referrals', icon: Wallet, path: '/dashboard/wallet', premium: true },
+    { label: 'Subscription', icon: UserCircle2, path: '/dashboard/subscription' },
+    { label: 'Settings', icon: Settings, path: '/dashboard/settings' }
+  ];
+
+  // Navigation items for Investor
+  const investorNavItems: NavItem[] = [
+    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard-investor' },
+    {
+      label: 'Startup Marketplace',
+      icon: Briefcase,
+      path: '/dashboard-investor/explore-ideas',
+      submenu: [
+        { label: 'Explore All Ideas', path: '/dashboard-investor/explore-ideas' },
+        { label: 'Saved & Pipeline', path: '/dashboard-investor/pipeline' }
+      ]
+    },
+    {
+      label: 'Hire Freelancers',
+      icon: Users,
+      path: '/dashboard-investor/talent'
+    },
+    { label: 'Meetings', icon: Calendar, path: '/dashboard-investor/meetings' },
+    { label: 'Messages', icon: MessageSquare, path: '/dashboard-investor/messages', badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
+    { label: 'Earnings & Referrals', icon: Wallet, path: '/dashboard-investor/wallet', premium: true },
+    { label: 'Subscription', icon: UserCircle2, path: '/dashboard-investor/subscription' },
+    { label: 'Settings', icon: Settings, path: '/dashboard-investor/settings' }
+  ];
+
+  // Navigation items for Startup Creator
+  const startupCreatorNavItems: NavItem[] = [
+    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard-startup' },
+    {
+      label: 'My Portals',
+      icon: Briefcase,
+      path: '/dashboard-startup/ideas'
+    },
+    { label: 'Analytics', icon: Search, path: '/dashboard-startup/analytics' },
+    { label: 'NDA Requests', icon: FileText, path: '/dashboard-startup/nda' },
+    { label: 'Messages', icon: MessageSquare, path: '/dashboard-startup/messages', badge: unreadMessageCount > 0 ? unreadMessageCount : undefined },
+    { label: 'Subscription', icon: UserCircle2, path: '/dashboard-startup/subscription' },
+    { label: 'Settings', icon: Settings, path: '/dashboard-startup/settings' }
+  ];
+
+  const adminNavItems: NavItem[] = [
+    { label: 'Admin Panel', icon: LayoutDashboard, path: '/admin' }
+  ];
+
+  const navItems =
+    userType === 'client' ? clientNavItems :
+      userType === 'freelancer' ? freelancerNavItems :
+        userType === 'investor' ? investorNavItems :
+          userType === 'admin' ? adminNavItems :
+            startupCreatorNavItems;
+
+  const toggleSubmenu = (label: string) => {
+    setExpandedMenus(prev =>
+      prev.includes(label) ? prev.filter(item => item !== label) : [...prev, label]
+    );
+  };
+
+  const isActiveRoute = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userName');
+    navigate('/');
+    window.location.reload();
+  };
+
+  const getProfileImage = () => {
+    return getImgUrl(currentUser?.profile_image) || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80";
+  };
+
+  const getCurrentUserName = () => {
+    const name = currentUser?.full_name || currentUser?.name || 'User';
+    if (name.includes('@')) {
+      const part = name.split('@')[0];
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    }
+    return name;
+  };
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  // Handle resize for reactivity
+  useEffect(() => {
+    const handleResize = () => {
+      const desktop = window.innerWidth >= 1024;
+      setIsDesktop(desktop);
+      if (desktop) setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-neutral-950 text-[#111111]' : 'bg-neutral-50 text-neutral-900'}`}>
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {incomingMessagePopup && (
+          <motion.div
+            initial={{ opacity: 0, x: 120 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 120 }}
+            className={`fixed right-6 top-24 z-[80] w-[340px] rounded-[1.75rem] border p-4 text-left shadow-2xl backdrop-blur-xl ${
+              isDarkMode
+                ? 'border-neutral-800 bg-neutral-900/95'
+                : 'border-neutral-200 bg-white/95'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                {incomingMessagePopup.avatar ? (
+                  <img
+                    src={incomingMessagePopup.avatar}
+                    alt={incomingMessagePopup.name}
+                    className="h-12 w-12 rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F24C20]/10 text-[#F24C20] font-black">
+                    {incomingMessagePopup.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#F24C20]">
+                    New Message
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIncomingMessagePopup(null);
+                    }}
+                    className={`rounded-full p-1 ${
+                      isDarkMode ? 'text-neutral-500 hover:bg-neutral-800' : 'text-neutral-400 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate(`${dashboardBase}/messages?user=${incomingMessagePopup.id}`);
+                    setIncomingMessagePopup(null);
+                  }}
+                  className="w-full text-left"
+                >
+                  <div className="mt-1 truncate text-sm font-bold text-[#111111]">
+                    {incomingMessagePopup.name}
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-sm text-[#4a4a4a]">
+                    {incomingMessagePopup.message}
+                  </div>
+                  <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-[#F24C20]">
+                    Open in Messages
+                  </div>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 left-0 right-0 h-16 z-40 border-b backdrop-blur-xl ${isDarkMode
+          ? 'bg-neutral-900/50 border-neutral-800'
+          : 'bg-white/50 border-neutral-200'
+          }`}
+      >
+        <div className="h-full px-4 lg:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-4 lg:gap-6">
+            <button
+              onClick={() => {
+                if (!isDesktop) {
+                  setIsMobileMenuOpen(true);
+                } else {
+                  setSidebarCollapsed(!sidebarCollapsed);
+                }
+              }}
+              className="p-2 rounded-lg transition-colors hover:bg-[#F24C20]/15 text-[#6b625b] hover:text-[#F24C20]"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src={logoUrl}
+                alt={site_name || 'Go Experts'}
+                className="h-7 lg:h-8 w-auto object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== logoFallback) target.src = logoFallback;
+                }}
+              />
+            </Link>
+            <div className="hidden lg:flex items-center gap-2 w-96">
+              <div className="relative flex-1 rounded-lg overflow-hidden bg-[#fff3e7] border border-[#f2c9a7]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b625b]" />
+                <input
+                  type="text"
+                  placeholder="Search projects, ventures, talents..."
+                  className="w-full pl-10 pr-4 py-2 bg-transparent text-sm text-[#111111] placeholder:text-[#6b625b] outline-none"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 lg:gap-3">
+
+            <div
+              ref={notificationsRef}
+              className="relative"
+            >
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-lg transition-colors hover:bg-[#F24C20]/15 text-[#6b625b] hover:text-[#F24C20]"
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-[#F24C20] rounded-full" />}
+              </button>
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className={`absolute right-0 top-12 w-80 rounded-xl border overflow-hidden shadow-xl ${isDarkMode ? 'bg-neutral-900/95 border-neutral-800' : 'bg-white border-neutral-200'}`}
+                  >
+                    <div className={`p-4 border-b ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}`}><h3 className="font-semibold text-[#111111]">Notifications</h3></div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length > 0 ? notifications.map((notif) => (
+                        <Link key={notif.id} to={notif.path} onClick={() => setShowNotifications(false)} className={`block p-4 border-b hover:bg-[#F24C20]/15 cursor-pointer transition-colors ${isDarkMode ? 'border-neutral-800' : 'border-neutral-100'}`}>
+                          <div className="text-sm text-[#111111]">{notif.title}</div>
+                          <div className={`text-xs mt-1 ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>{formatDistanceToNow(notif.time, { addSuffix: true })}</div>
+                        </Link>
+                      )) : <div className={`p-6 text-center text-sm ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>No new notifications</div>}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div ref={profileMenuRef} className="relative">
+              <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-2 p-1.5 rounded-lg transition-colors hover:bg-[#F24C20]/15">
+                <img src={getProfileImage()} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+              </button>
+              <AnimatePresence>
+                {showProfileMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className={`absolute right-0 top-12 w-64 rounded-xl border overflow-hidden shadow-xl ${isDarkMode ? 'bg-neutral-900/95 border-neutral-800' : 'bg-white border-neutral-200'}`}
+                  >
+                    <div className={`p-4 border-b ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}`}>
+                      <div className="font-semibold text-[#111111]">{getCurrentUserName()}</div>
+                      <div className="text-sm text-[#6b625b]">{currentUser?.email || ''}</div>
+                    </div>
+                    <div className="p-2">
+                      <Link to={`${dashboardBase}/settings`} className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111111] transition-colors hover:bg-[#F24C20]/15 hover:text-[#F24C20]">
+                        <UserIcon className="w-4 h-4" /> <span className="text-sm">My Profile</span>
+                      </Link>
+                      <button onClick={handleLogout} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-red-500/10 text-red-400' : 'hover:bg-red-50 text-red-600'}`}>
+                        <LogOut className="w-4 h-4" /> <span className="text-sm">Logout</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Sidebar - Desktop and Mobile */}
+      <motion.aside
+        initial={{ x: -280 }}
+        animate={{
+          x: (isDesktop || isMobileMenuOpen) ? 0 : -280,
+          width: (sidebarCollapsed && isDesktop) ? 80 : 280
+        }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+        className={`fixed left-0 top-0 lg:top-16 bottom-0 z-[60] border-r backdrop-blur-xl ${isDarkMode ? 'bg-neutral-900/95 border-neutral-800' : 'bg-white/95 border-neutral-200 shadow-2xl lg:shadow-none'}`}
+      >
+        <div className="h-full overflow-y-auto py-6 px-3">
+          {/* Mobile Header Logo */}
+          <div className="flex lg:hidden items-center justify-between mb-8 px-2">
+            <img src={logoUrl} alt="Logo" className="h-7 w-auto object-contain" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2 rounded-lg active:scale-95 transition-all ${isDarkMode ? 'bg-neutral-800/50 text-neutral-400' : 'bg-neutral-100 text-neutral-600'}`}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isActiveRoute(item.path);
+              const hasSubmenu = item.submenu && item.submenu.length > 0;
+              const isExpanded = expandedMenus.includes(item.label);
+              const collapsed = sidebarCollapsed && isDesktop;
+
+              return (
+                <div key={item.label}>
+                  <motion.div whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                    {hasSubmenu ? (
+                      <button
+                        onClick={() => toggleSubmenu(item.label)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isActive ? 'bg-[#F24C20] text-white font-semibold' : isDarkMode ? 'text-[#111111] hover:bg-[#F24C20] hover:text-white' : 'text-[#111111] hover:bg-[#F24C20] hover:text-white'}`}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {!collapsed && (
+                          <>
+                            <div className="flex-1 min-w-0 flex items-center gap-1">
+                              <span className="text-left text-sm font-medium truncate">{item.label}</span>
+                              {item.premium && (
+                                <span className="relative -ml-1 -mt-3 inline-flex h-4 w-4 rotate-[24deg] items-center justify-center text-amber-500">
+                                  <Crown className="h-3.5 w-3.5" />
+                                </span>
+                              )}
+                            </div>
+                            <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          </>
+                        )}
+                        {item.badge && !collapsed && <span className="px-2 py-0.5 bg-[#F24C20] text-white text-xs rounded-full">{item.badge}</span>}
+                      </button>
+                    ) : (
+                      <Link
+                        to={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isActive ? 'bg-[#F24C20] text-white font-semibold' : isDarkMode ? 'text-[#111111] hover:bg-[#F24C20] hover:text-white' : 'text-[#111111] hover:bg-[#F24C20] hover:text-white'}`}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {!collapsed && (
+                          <div className="flex-1 min-w-0 flex items-center gap-1">
+                            <span className="text-sm font-medium truncate">{item.label}</span>
+                            {item.premium && (
+                              <span className="relative -ml-1 -mt-3 inline-flex h-4 w-4 rotate-[24deg] items-center justify-center text-amber-500">
+                                <Crown className="h-3.5 w-3.5" />
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {item.badge && !collapsed && <span className="px-2 py-0.5 bg-[#F24C20] text-white text-xs rounded-full">{item.badge}</span>}
+                      </Link>
+                    )}
+                  </motion.div>
+                  <AnimatePresence>
+                    {hasSubmenu && isExpanded && !collapsed && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="ml-8 mt-1 space-y-1 overflow-hidden">
+                        {item.submenu?.map((subItem) => (
+                          <Link key={subItem.path} to={subItem.path} onClick={() => setIsMobileMenuOpen(false)} className={`block px-3 py-2 rounded-lg text-sm transition-colors ${location.pathname === subItem.path ? 'bg-[#F24C20] text-white font-semibold' : isDarkMode ? 'text-[#4a4a4a] hover:bg-[#F24C20] hover:text-white' : 'text-[#4a4a4a] hover:bg-[#F24C20] hover:text-white'}`}>
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+            <motion.div whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }} className="pt-4">
+              <button onClick={handleLogout} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isDarkMode ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}>
+                <LogOut className="w-5 h-5 flex-shrink-0" /> {!(sidebarCollapsed && isDesktop) && <span className="text-sm font-medium">Logout</span>}
+              </button>
+            </motion.div>
+          </nav>
+        </div>
+      </motion.aside>
+
+      {/* Main Content */}
+      <main className={`pt-16 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'} ml-0`}>
+        <div className="p-4 lg:p-6">{children}</div>
+      </main>
+    </div>
+  );
+}

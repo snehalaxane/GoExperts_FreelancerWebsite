@@ -1,0 +1,1219 @@
+import { motion, AnimatePresence } from 'motion/react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useTheme } from '@/app/components/ThemeProvider';
+import {
+  Clock,
+  IndianRupee,
+  MapPin,
+  Bookmark,
+  Share2,
+  CheckCircle,
+  Calendar,
+  FileText,
+  Star,
+  MessageCircle,
+  Shield,
+  TrendingUp,
+  X,
+  Loader2,
+  AlertCircle,
+  Lock,
+  Briefcase,
+  Users,
+  Award,
+  ThumbsUp,
+  RotateCcw,
+  Sparkles,
+  Mail
+} from 'lucide-react';
+import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
+import { useState, useEffect } from 'react';
+import api, { getImgUrl } from '@/app/utils/api';
+import { toast } from 'sonner';
+import { CreditUnlockModal } from '@/app/components/subscription/CreditUnlockModal';
+
+export default function ProjectDetails() {
+  const { isDarkMode } = useTheme();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [showApplyCreditModal, setShowApplyCreditModal] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [proposal, setProposal] = useState({
+    coverLetter: '',
+    bidAmount: '',
+    deliveryTime: '',
+    portfolioLink: '',
+  });
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userVerified, setUserVerified] = useState<boolean | null>(null);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [clientProjects, setClientProjects] = useState<any[]>([]);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [loadingProposals, setLoadingProposals] = useState(false);
+  const [awardingProposalId, setAwardingProposalId] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const applicationPointCost = 1;
+  const [remainingProjectApplications, setRemainingProjectApplications] = useState<number>(0);
+  const PROPOSAL_LIMITS = {
+    coverLetterMin: 30,
+    coverLetterMax: 2000,
+    bidAmountMin: 100,
+    bidAmountMax: 10000000,
+    deliveryWeeksMin: 1,
+    deliveryWeeksMax: 80,
+    portfolioLinkMax: 500
+  } as const;
+
+  useEffect(() => {
+    if (id) {
+      fetchProjectDetails();
+      checkIfUnlocked();
+      fetchUserStatus();
+      checkIfSaved();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (project && currentUser) {
+      const isOwner = String(project.client_id?._id || project.client_id) === String(currentUser?._id || currentUser?.id);
+      if (isOwner) {
+        fetchProposals(project._id);
+      }
+    }
+  }, [project, currentUser]);
+
+  const checkIfSaved = async () => {
+    try {
+      const res = await api.get('/users/favorites');
+      if (res.data.success) {
+        const isSaved = res.data.data.some((p: any) => p._id === id);
+        setSaved(isSaved);
+      }
+    } catch (err) {
+      console.error('Error checking saved status:', err);
+    }
+  };
+
+  const fetchUserStatus = async () => {
+    try {
+      const [meRes, subRes] = await Promise.all([
+        api.get('/auth/me'),
+        api.get('/subscription/my-status').catch(() => null)
+      ]);
+
+      if (meRes.data.success) {
+        setCurrentUser(meRes.data.user);
+        setUserVerified(meRes.data.user.kyc_details?.is_verified || false);
+        setUserRole(meRes.data.user.roles[0]); // Primary role
+      }
+
+      const remaining = Number(subRes?.data?.subscription?.remaining_project_posts ?? 0);
+      setRemainingProjectApplications(remaining);
+    } catch (err) {
+      console.error('Error fetching user status:', err);
+    }
+  };
+
+  const fetchProposals = async (projectId: string) => {
+    try {
+      setLoadingProposals(true);
+      const res = await api.get(`/projects/${projectId}/proposals`);
+      if (res.data.success) {
+        setProposals(res.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching proposals:', err);
+    } finally {
+      setLoadingProposals(false);
+    }
+  };
+
+  const handleAwardProject = async (projectId: string, proposalId: string) => {
+    try {
+      setAwardingProposalId(proposalId);
+      const res = await api.put(`/projects/${projectId}/award/${proposalId}`);
+      if (res.data.success) {
+        toast.success(res.data.message || 'Project successfully awarded!');
+        fetchProjectDetails(); // Refresh to show closed status
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to award project');
+    } finally {
+      setAwardingProposalId(null);
+    }
+  };
+
+  const fetchClientProjects = async (clientId: string, currentProjectId: string) => {
+    if (!clientId) return;
+    try {
+      setFetchingMore(true);
+      const res = await api.get(`/projects?client_id=${clientId}`);
+      if (res.data.success) {
+        // Filter out current project and keep max 3
+        const others = res.data.data.filter((p: any) => p._id !== currentProjectId).slice(0, 3);
+        setClientProjects(others);
+      }
+    } catch (err) {
+      console.error('Error fetching client projects:', err);
+    } finally {
+      setFetchingMore(false);
+    }
+  };
+
+
+  const checkIfUnlocked = async () => {
+    if (!id || id === 'undefined' || id.length < 12) return;
+    try {
+      const res = await api.get(`/subscription/is-unlocked/${id}`);
+      if (res.data.success && res.data.isUnlocked) {
+        setIsUnlocked(true);
+      }
+    } catch (err) {
+      console.error('Error checking unlock status:', err);
+    }
+  };
+
+  const fetchProjectDetails = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/projects/${id}`);
+      if (res.data.success) {
+        setProject(res.data.data);
+        fetchClientProjects(res.data.data.client_id?._id || res.data.data.client_id, res.data.data._id);
+      } else {
+        setError('Project not found');
+      }
+    } catch (err: any) {
+      console.error('Error fetching project:', err);
+      setError(err.response?.data?.message || 'Failed to fetch project details');
+      toast.error('Failed to load project details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  const handleToggleSave = async () => {
+    try {
+      setFavoriteLoading(true);
+      const res = await api.put(`/users/favorites/${id}`);
+      if (res.data.success) {
+        setSaved(res.data.isFavorited);
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      toast.error('Failed to update favorites');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
+  const handleShare = (type: 'whatsapp' | 'email') => {
+    const text = `Check out this project on Go Experts: ${project.title}`;
+    const url = window.location.href;
+
+    if (type === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+    } else {
+      window.open(`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(text + '\n' + url)}`, '_blank');
+    }
+    setShowShareModal(false);
+  };
+
+  const handleApply = async () => {
+    const coverLetter = proposal.coverLetter.trim();
+    const deliveryTime = proposal.deliveryTime.trim();
+    const portfolioLink = proposal.portfolioLink.trim();
+    const bidAmount = Number(String(proposal.bidAmount).replace(/[^0-9.]/g, ''));
+
+    if (coverLetter.length < PROPOSAL_LIMITS.coverLetterMin || coverLetter.length > PROPOSAL_LIMITS.coverLetterMax) {
+      toast.error(`Cover letter must be ${PROPOSAL_LIMITS.coverLetterMin}-${PROPOSAL_LIMITS.coverLetterMax} characters.`);
+      return;
+    }
+    if (!Number.isFinite(bidAmount) || bidAmount < PROPOSAL_LIMITS.bidAmountMin || bidAmount > PROPOSAL_LIMITS.bidAmountMax) {
+      toast.error(`Bid amount must be between ₹${PROPOSAL_LIMITS.bidAmountMin} and ₹${PROPOSAL_LIMITS.bidAmountMax}.`);
+      return;
+    }
+    const deliveryWeeks = Number(deliveryTime);
+    if (!Number.isFinite(deliveryWeeks) || deliveryWeeks < PROPOSAL_LIMITS.deliveryWeeksMin || deliveryWeeks > PROPOSAL_LIMITS.deliveryWeeksMax) {
+      toast.error(`Delivery time must be ${PROPOSAL_LIMITS.deliveryWeeksMin}-${PROPOSAL_LIMITS.deliveryWeeksMax} weeks.`);
+      return;
+    }
+    if (portfolioLink && (portfolioLink.length > PROPOSAL_LIMITS.portfolioLinkMax || !/^https?:\/\//i.test(portfolioLink))) {
+      toast.error('Portfolio link must start with http:// or https:// and be valid.');
+      return;
+    }
+
+    try {
+      const res = await api.post(`/projects/${id}/interest`, {
+        message: coverLetter,
+        bid_amount: bidAmount,
+        delivery_time: `${deliveryWeeks} weeks`,
+        portfolio_link: portfolioLink
+      });
+      if (res.data.success) {
+        const debitInfo = res.data?.data;
+        const debited = Number(debitInfo?.debited_applications ?? 0);
+        const applicationsAfter = Number(debitInfo?.applications_after ?? 0);
+        const isThisProject = String(debitInfo?.applied_project_id || '') === String(id || '');
+        const successMsg = isThisProject && debited > 0
+          ? `Applied successfully. ${applicationsAfter} applications left.`
+          : 'Applied successfully.';
+        toast.success(successMsg);
+        setRemainingProjectApplications(applicationsAfter);
+        setShowApplyModal(false);
+        fetchProjectDetails(); // Refresh to show "Applied" status
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to submit proposal');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-20">
+        <Loader2 className="w-12 h-12 text-[#F24C20] animate-spin mb-4" />
+        <p className="text-neutral-400">Loading project details...</p>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-20 text-center">
+        <AlertCircle className="w-16 h-16 text-neutral-800 mb-6" />
+        <h2 className="text-2xl font-bold text-white mb-2">{error || 'Project not found'}</h2>
+        <Link to="/dashboard/projects/my-projects" className="text-[#F24C20] hover:underline">Back to Projects</Link>
+      </div>
+    );
+  }
+
+  const similarProjects: any[] = []; // Would normally fetch from API
+
+  const isOwner = project && currentUser && (
+    String(project.client_id?._id || project.client_id) === String(currentUser?._id || currentUser?.id)
+  );
+
+  const isHired = project && currentUser && (
+    String(project.hired_freelancer_id?._id || project.hired_freelancer_id) === String(currentUser?._id || currentUser?.id)
+  );
+  
+  const canSeeFullDetails = isUnlocked || isOwner || isHired;
+
+  return (
+    <div className={`min-h-screen pt-5 lg:pt-40 pb-12 ${isDarkMode ? 'bg-neutral-950' : 'bg-[#fdf7f2]'}`}>
+      <div className="max-w-7xl mx-auto px-4 lg:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+            {/* Breadcrumb + Back Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className={`w-fit flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs lg:text-sm transition-all group ${isDarkMode ? 'bg-neutral-900 border border-neutral-800 hover:border-[#F24C20] hover:text-[#F24C20] text-neutral-400' : 'bg-white border border-[#f2d7c2] hover:border-[#F24C20] hover:text-[#F24C20] text-[#7a5a49]'}`}
+              >
+                <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                Back
+              </button>
+              <div className={`flex items-center gap-2 text-[10px] lg:text-sm ${isDarkMode ? 'text-neutral-400' : 'text-[#7a5a49]'}`}>
+                <button onClick={() => navigate(-1)} className="hover:text-[#F24C20] transition-colors">Projects</button>
+                <span>/</span>
+                <span className={`${isDarkMode ? 'text-neutral-500' : 'text-[#8b6b5a]'} truncate max-w-[100px] lg:max-w-none`}>{project.category}</span>
+                <span>/</span>
+                <span className={isDarkMode ? 'text-white' : 'text-[#1f120d]'}>Details</span>
+              </div>
+            </div>
+
+            {/* Project Completed Banner */}
+            {project.status === 'completed' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 lg:gap-4 p-4 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30"
+              >
+                <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-green-500/30">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs lg:text-sm font-bold text-green-400 truncate">Project Successfully Completed</div>
+                  <div className="text-[10px] lg:text-xs text-neutral-400 mt-0.5">
+                    {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-green-400 hidden sm:block" />
+                  <span className="text-[10px] lg:text-xs font-semibold text-green-400 whitespace-nowrap">Delivered</span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Header Section */}
+            <div>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="px-3 py-1 bg-[#F24C20]/10 text-[#F24C20] text-[10px] lg:text-sm font-medium rounded-lg border border-[#F24C20]/30 whitespace-nowrap">
+                      {project.category}
+                    </span>
+                    <span className={`text-[10px] lg:text-sm ${isDarkMode ? 'text-neutral-400' : 'text-[#7a5a49]'}`}>{project.postedTime}</span>
+                  </div>
+                  <h1 className={`text-2xl lg:text-2xl font-bold mb-4 line-clamp-3 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                    {project.title}
+                  </h1>
+                  <div className={`flex flex-wrap items-center gap-4 ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#F24C20]" />
+                      <span className="text-xs lg:text-sm">Remote</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-[#F24C20]" />
+                      <span className="text-xs lg:text-sm">Posted {new Date(project.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Budget Section */}
+            <div className={`p-5 lg:p-6 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg lg:text-lg font-black text-white uppercase tracking-tight">Project Budget</div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-md lg:text-lg font-black ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                      {project.budget_range}
+                    </span>
+                  </div>
+                  <div className={`text-[10px] lg:text-sm mt-1 uppercase tracking-widest font-black ${isDarkMode ? 'text-neutral-600' : 'text-[#8b6b5a]'}`}>Fixed Price</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Client Management Interface for Proposals */}
+            {isOwner && (
+              <div className="p-6 lg:p-8 bg-neutral-900 border border-neutral-800 rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                         <h2 className="text-lg lg:text-lg font-black text-white uppercase tracking-tight">Review Proposals</h2>
+                         <p className="text-xs lg:text-sm text-neutral-400 mt-1 font-medium">
+                           {project.status === 'live' 
+                             ? 'View and award your project to the best freelancer.' 
+                             : 'You have selected a freelancer for this project.'}
+                         </p>
+                    </div>
+                   <div className="w-fit flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 bg-black/20 border border-neutral-800 rounded-xl">
+                        <Users className="w-4 h-4 lg:w-5 lg:h-5 text-[#F24C20]" />
+                        <span className="font-black text-white text-xs lg:text-base">{proposals.length}</span>
+                        <span className="text-[10px] lg:text-xs text-neutral-500 uppercase font-black">Applications</span>
+                   </div>
+                </div>
+
+                {loadingProposals ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 text-[#F24C20] animate-spin" />
+                  </div>
+                ) : proposals.length > 0 ? (
+                  <div className="space-y-4">
+                    {proposals.map((prop) => (
+                      <div 
+                        key={prop._id}
+                        className={`p-4 lg:p-6 rounded-2xl border transition-all ${
+                            prop.status === 'accepted' 
+                            ? 'bg-green-500/10 border-green-500/30' 
+                            : 'bg-black/20 border-neutral-800 hover:border-neutral-700'
+                        }`}
+                      >
+                         <div className="flex flex-col gap-5">
+                            <div className="flex items-start justify-between gap-4">
+                               <div className="flex gap-3 lg:gap-4">
+                                  <ImageWithFallback
+                                     src={prop.freelancer_id?.profile_image ? (prop.freelancer_id.profile_image.startsWith('http') ? prop.freelancer_id.profile_image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${prop.freelancer_id.profile_image}`) : `https://ui-avatars.com/api/?name=${prop.freelancer_id?.full_name}`}
+                                     className="w-10 h-10 lg:w-14 lg:h-14 rounded-full object-cover border-2 border-neutral-800"
+                                     alt={prop.freelancer_id?.full_name}
+                                  />
+                                  <div className="min-w-0">
+                                     <div className="flex items-center gap-1.5 mb-0.5">
+                                        <h4 className="font-black text-xs lg:text-base text-white truncate">{prop.freelancer_id?.full_name}</h4>
+                                        {prop.freelancer_id?.kyc_details?.is_verified && (
+                                          <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
+                                        )}
+                                     </div>
+                                     <div className="flex flex-wrap items-center gap-2 lg:gap-3 text-[10px] lg:text-sm text-neutral-500 font-medium">
+                                        <div className="flex items-center gap-1">
+                                           <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                           <span>4.9</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                           <Clock className="w-3 h-3" />
+                                           <span>{prop.delivery_time}</span>
+                                        </div>
+                                     </div>
+                                  </div>
+                               </div>
+                               <div className="text-right shrink-0">
+                                  <div className="text-sm lg:text-xl font-black text-white">₹{prop.bid_amount.toLocaleString()}</div>
+                                  {prop.status === 'accepted' && (
+                                    <span className="text-[8px] lg:text-[10px] font-black bg-green-500 text-white px-2 py-0.5 rounded-full uppercase">Hired</span>
+                                  )}
+                               </div>
+                            </div>
+
+                            <div className="p-3 lg:p-4 bg-black/40 rounded-xl border border-neutral-800">
+                               <p className="text-[11px] lg:text-sm text-neutral-400 italic leading-relaxed">"{prop.message}"</p>
+                            </div>
+
+                            <div className="flex gap-2">
+                               {project.status === 'live' && prop.status !== 'accepted' && (
+                                  <button
+                                     onClick={() => handleAwardProject(project._id, prop._id)}
+                                     disabled={awardingProposalId !== null}
+                                     className="flex-1 py-2.5 bg-[#F24C20] hover:bg-orange-600 text-white rounded-xl text-[10px] lg:text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-[#F24C20]/20 flex items-center justify-center gap-2"
+                                  >
+                                     {awardingProposalId === prop._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />}
+                                     Award Project
+                                  </button>
+                               )}
+                               <button 
+                                  onClick={() => navigate(`/dashboard/messages?user=${prop.freelancer_id?._id || prop.freelancer_id}`)}
+                                  className="flex-1 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-[10px] lg:text-xs font-black uppercase tracking-widest transition-all border border-neutral-700 flex items-center justify-center gap-2"
+                               >
+                                  <MessageCircle className="w-3 h-3" />
+                                  Message
+                                </button>
+                             </div>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-neutral-950 p-8 lg:p-12 rounded-2xl border border-neutral-800 text-center border-dashed">
+                      <Users className="w-10 h-10 lg:w-12 lg:h-12 text-neutral-800 mx-auto mb-4" />
+                      <p className="text-xs lg:text-sm text-neutral-500 font-black uppercase tracking-widest opacity-60">No Proposals Yet</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Project Description */}
+            <div className={`p-6 lg:p-8 rounded-2xl relative overflow-hidden ${project.status === 'closed' ? 'grayscale opacity-80' : ''} ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+              {/* Expired Ribbon */}
+              {project.status === 'closed' && (
+                <div className="absolute top-10 -right-12 bg-neutral-800 text-white border border-white/20 px-16 py-1 rotate-45 font-black text-[10px] lg:text-sm shadow-2xl z-20 pointer-events-none">
+                  EXPIRED
+                </div>
+              )}
+
+              <h2 className={`text-lg lg:text-lg font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Project Description</h2>
+
+              <div className={`prose max-w-none whitespace-pre-line text-sm lg:text-base leading-relaxed ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                {project.description}
+              </div>
+            </div>
+
+            {/* Project Attachments */}
+            {project.attachments && project.attachments.length > 0 && (
+              <div className="p-6 lg:p-8 bg-neutral-900 border border-neutral-800 rounded-2xl">
+                <h2 className="text-xl lg:text-2xl font-black mb-6 text-white flex items-center gap-3">
+                  <FileText className="w-5 h-5 lg:w-6 lg:h-6 text-[#F24C20]" />
+                  Internal Documentation
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
+                  {project.attachments.map((file: string, index: number) => {
+                    const fileName = file.split('/').pop() || `Attachment ${index + 1}`;
+                    return (
+                      <a
+                        key={index}
+                        href={getImgUrl(file)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-3 p-3 lg:p-4 rounded-xl border border-neutral-800 bg-black/20 hover:border-[#F24C20]/50 transition-all overflow-hidden"
+                      >
+                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-neutral-800 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 lg:w-6 lg:h-6 text-neutral-400 group-hover:text-[#F24C20] transition-colors" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs lg:text-sm font-bold text-white truncate">{fileName}</div>
+                          <div className="text-[10px] text-neutral-500 uppercase font-black">{file.split('.').pop()}</div>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Skills Required */}
+            <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+              <h2 className={`text-lg lg:text-lg font-black mb-4 uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>Expertise Required</h2>
+              <div className="flex flex-wrap gap-2 lg:gap-3">
+                {project.skills_required?.map((skill: string) => (
+                  <span
+                    key={skill}
+                    className={`px-3 py-1.5 lg:px-4 lg:py-2 text-[10px] lg:text-xs font-black uppercase tracking-widest rounded-lg transition-all cursor-default ${isDarkMode ? 'bg-neutral-800 text-neutral-300 border border-neutral-700 hover:border-[#F24C20] hover:text-white' : 'bg-[#fff7ef] text-[#5f4a3f] border border-[#f2d7c2] hover:border-[#F24C20] hover:text-[#1f120d]'}`}
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+
+
+            {/* More Projects from this Client */}
+            {clientProjects.length > 0 && (
+              <div>
+                <h2 className={`text-lg font-bold mb-6 flex items-center justify-between ${isDarkMode ? 'text-white' : 'text-[#F24C20]'}`}>
+                  <span>More Projects from this Client</span>
+                  <Link 
+                    to={`/projects?search=${encodeURIComponent(project.client_id?.full_name || '')}`} 
+                    className="text-sm font-medium text-[#F24C20] hover:underline"
+                  >
+                    View All
+                  </Link>
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {clientProjects.map((similar) => (
+                    <Link
+                      key={similar._id}
+                      to={`/projects/${similar._id}`}
+                      className={`group rounded-xl overflow-hidden transition-all duration-300 flex flex-col ${isDarkMode ? 'bg-neutral-900/50 border border-neutral-800 hover:border-[#F24C20]/50 hover:shadow-xl hover:shadow-[#F24C20]/10' : 'bg-white border border-[#f2d7c2] shadow-sm hover:border-[#F24C20]/50 hover:shadow-xl hover:shadow-[#F24C20]/10'}`}
+                    >
+                      <div className="h-40 overflow-hidden relative">
+                        <ImageWithFallback
+                          src={similar.image || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80'}
+                          alt={similar.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className={`absolute top-3 left-3 px-2 py-1 rounded-lg text-[10px] font-bold border ${isDarkMode ? 'bg-black/50 backdrop-blur-md text-white border-white/10' : 'bg-white/95 text-[#2b160e] border-[#f2d7c2]'}`}>
+                          {similar.category}
+                        </div>
+                      </div>
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <h3 className={`font-bold mb-2 line-clamp-2 group-hover:text-[#F24C20] transition-colors leading-snug ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                          {similar.title}
+                        </h3>
+                        <div className={`flex items-center justify-between text-xs pt-3 mt-2 ${isDarkMode ? 'border-t border-neutral-800' : 'border-t border-[#f2d7c2]'}`}>
+                          <span className={`font-medium ${isDarkMode ? 'text-neutral-400' : 'text-[#6f5548]'}`}>₹{similar.budget_range}</span>
+                          <div className={`flex items-center gap-1 ${isDarkMode ? 'text-neutral-500' : 'text-[#8b6b5a]'}`}>
+                             <Briefcase className="w-3 h-3" />
+                             <span>{similar.proposals || 0} applications</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Sticky Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-5">
+
+              {/* ─── COMPLETED PROJECT SIDEBAR ─── */}
+              {project.status === 'completed' ? (
+                <>
+                  {/* Completion Summary Card */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-500/8 to-neutral-900/80 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b border-green-500/20 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <Award className="w-4 h-4 text-green-400" />
+                      </div>
+                      <span className="font-bold text-white text-sm">Project Summary</span>
+                    </div>
+                    <div className="p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-neutral-400">Final Budget</span>
+                        <span className="font-bold text-white">{project.budget_range}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-neutral-400">Posted</span>
+                        <span className="text-sm font-medium text-neutral-300">
+                          {new Date(project.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-neutral-400">Completed</span>
+                        <span className="text-sm font-medium text-green-400">
+                          {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-neutral-400">Proposals</span>
+                        <span className="text-sm font-medium text-neutral-300">{project.proposals || 0} received</span>
+                      </div>
+                      <div className="pt-3 border-t border-green-500/20 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                        <span className="text-xs text-green-400 font-semibold">All deliverables accepted</span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Hired Freelancer Card */}
+                  {project.hired_freelancer_id && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.1 }}
+                      className="p-5 rounded-2xl border border-neutral-800 bg-neutral-900/60"
+                    >
+                      <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4">Work Delivered By</div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="relative">
+                          <ImageWithFallback
+                            src={project.hired_freelancer_id?.profile_image
+                              ? (project.hired_freelancer_id.profile_image.startsWith('http') ? project.hired_freelancer_id.profile_image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${project.hired_freelancer_id.profile_image}`)
+                              : `https://ui-avatars.com/api/?name=${project.hired_freelancer_id?.full_name}&background=F24C20&color=fff`}
+                            alt={project.hired_freelancer_id?.full_name || 'Freelancer'}
+                            className="w-14 h-14 rounded-full object-cover border-2 border-green-500/40"
+                          />
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-neutral-900">
+                            <CheckCircle className="w-3 h-3 text-white" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-white truncate">{project.hired_freelancer_id?.full_name || 'Freelancer'}</div>
+                          <div className="text-xs text-neutral-400 mt-0.5">{project.hired_freelancer_id?.location || 'Remote'}</div>
+                          <div className="flex items-center gap-1 mt-1">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} className={`w-3 h-3 ${s <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-600'}`} />
+                            ))}
+                            <span className="text-xs text-neutral-400 ml-1">4.0</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => navigate(`/dashboard/messages?user=${project.hired_freelancer_id?._id || project.hired_freelancer_id}`)}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-semibold transition-all border border-neutral-700"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          Message
+                        </button>
+                        <button
+                          onClick={() => navigate(`/dashboard/projects/create`)}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#F24C20] hover:bg-orange-600 text-white text-sm font-semibold transition-all shadow-lg shadow-[#F24C20]/20"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          Hire Again
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Leave a Review */}
+                  {isOwner && !reviewSubmitted && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: 0.2 }}
+                      className="p-5 rounded-2xl border border-neutral-800 bg-neutral-900/60"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <ThumbsUp className="w-4 h-4 text-[#F24C20]" />
+                        <span className="font-bold text-white text-sm">Leave a Review</span>
+                      </div>
+                      <p className="text-xs text-neutral-400 mb-4">How was your experience working with this freelancer?</p>
+                      <div className="flex items-center gap-1.5 mb-4">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button 
+                            key={star}
+                            onMouseEnter={() => setReviewHover(star)}
+                            onMouseLeave={() => setReviewHover(0)}
+                            onClick={() => setReviewRating(star)}
+                            className="transition-transform hover:scale-110"
+                          >
+                            <Star className={`w-7 h-7 transition-colors ${
+                              star <= (reviewHover || reviewRating) ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-700'
+                            }`} />
+                          </button>
+                        ))}
+                        {reviewRating > 0 && (
+                          <span className="ml-2 text-sm font-semibold text-neutral-300">
+                            {['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'][reviewRating]}
+                          </span>
+                        )}
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={reviewText}
+                        onChange={e => setReviewText(e.target.value)}
+                        placeholder="Share your experience... (optional)"
+                        className="w-full px-3 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#F24C20] transition-colors resize-none mb-3"
+                      />
+                      <button
+                        disabled={reviewRating === 0 || reviewSubmitting}
+                        onClick={async () => {
+                          if (reviewRating === 0) return;
+                          setReviewSubmitting(true);
+                          try {
+                            await api.post(`/projects/${project._id}/review`, { rating: reviewRating, comment: reviewText });
+                            toast.success('Review submitted! Thank you.');
+                            setReviewSubmitted(true);
+                          } catch {
+                            toast.error('Failed to submit review. Please try again.');
+                          } finally {
+                            setReviewSubmitting(false);
+                          }
+                        }}
+                        className="w-full py-2.5 rounded-xl bg-[#F24C20] hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition-all flex items-center justify-center gap-2"
+                      >
+                        {reviewSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
+                        Submit Review
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {reviewSubmitted && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }} 
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-5 rounded-2xl border border-green-500/30 bg-green-500/5 text-center"
+                    >
+                      <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                      <div className="font-bold text-white text-sm mb-1">Review Submitted!</div>
+                      <div className="text-xs text-neutral-400">Thank you for your feedback</div>
+                    </motion.div>
+                  )}
+                  {/* Share */}
+                  <div 
+                    className="relative group/share"
+                    onMouseEnter={() => setShowShareModal(true)}
+                    onMouseLeave={() => setShowShareModal(false)}
+                  >
+                    <button 
+                      className="w-full py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl font-medium text-neutral-300 hover:text-white transition-all flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Share2 className="w-4 h-4" /> Share Project
+                    </button>
+                    <AnimatePresence>
+                      {showShareModal && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                          animate={{ opacity: 1, y: 0, scale: 1 }} 
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute bottom-full mb-3 left-0 right-0 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl p-2 z-50 overflow-hidden ring-1 ring-white/10"
+                        >
+                          <div className="flex flex-col gap-1">
+                            <button onClick={() => handleShare('whatsapp')} className="flex items-center justify-between gap-3 w-full p-3 hover:bg-emerald-500/10 rounded-lg transition-all group">
+                              <span className="text-sm text-neutral-300 group-hover:text-emerald-400">Share on WhatsApp</span>
+                              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                                <MessageCircle className="w-4 h-4 text-emerald-500 group-hover:text-white" />
+                              </div>
+                            </button>
+                            <button onClick={() => handleShare('email')} className="flex items-center justify-between gap-3 w-full p-3 hover:bg-[#F24C20]/10 rounded-lg transition-all group">
+                              <span className="text-sm text-neutral-300 group-hover:text-[#F24C20]">Share via Email</span>
+                              <div className="w-8 h-8 rounded-lg bg-[#F24C20]/10 flex items-center justify-center group-hover:bg-[#F24C20] group-hover:text-white transition-all">
+                                <Mail className="w-4 h-4 text-[#F24C20] group-hover:text-white" />
+                              </div>
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={`p-6 lg:p-8 border-2 rounded-2xl shadow-xl relative overflow-hidden transition-all duration-300 ${
+                    project.status === 'closed' ? (isDarkMode ? 'bg-neutral-900 border-neutral-700 opacity-60' : 'bg-white border-[#d8c4b5] opacity-80') : (isDarkMode ? 'bg-neutral-900 border-[#F24C20] shadow-[#F24C20]/10' : 'bg-white border-[#F24C20] shadow-[#F24C20]/10')
+                  }`}>
+                  {project.status === 'closed' && (
+                      <div className="absolute top-4 -right-8 bg-neutral-700 text-white px-10 py-1 rotate-45 font-black text-[10px] shadow-lg border border-white/10 z-10">
+                        EXPIRED
+                      </div>
+                    )}
+
+                    <div className="text-center mb-6">
+                      <div className={`text-sm lg:text-xl font-black mb-2 ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>{project.budget_range}</div>
+                      <div className={`text-[10px] lg:text-xs uppercase font-black tracking-[0.2em] ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>Fixed Compensation</div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {!isOwner && userRole === 'freelancer' && (
+                        <>
+                          {!project.isApplied && (
+                            <button
+                              disabled={project.status === 'closed'}
+                              onClick={() => {
+                                if (userVerified === false) {
+                                  toast.error('KYC verification required', {
+                                    action: { label: 'Settings', onClick: () => navigate('/dashboard/settings') }
+                                  });
+                                  return;
+                                }
+                                setShowApplyCreditModal(true);
+                              }}
+                              className={`w-full py-2 rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all shadow-xl ${
+                                project.status === 'closed' 
+                                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed shadow-none' 
+                                  : 'bg-[#044071] hover:bg-[#055a99] text-white shadow-[#044071]/30'
+                              }`}
+                            >
+                              {project.status === 'closed' ? 'Project Closed' : 'Apply for Project'}
+                            </button>
+                          )}
+                          {!project.isApplied && (
+                            <button
+                              onClick={handleToggleSave}
+                              disabled={favoriteLoading}
+                              className={`w-full py-2 rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all border-2 ${
+                                saved ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' : isDarkMode ? 'bg-transparent border-gray-800 text-gray-400 hover:border-[#F24C20] hover:text-gray-600' : 'bg-white border-[#f2d7c2] text-[#7a5a49] hover:border-[#F24C20] hover:text-[#1f120d]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-center gap-2">
+                                {favoriteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />}
+                                {saved ? 'Saved' : 'Save Project'}
+                              </div>
+                            </button>
+                          )}
+                          {project.isApplied && (
+                            <div className="w-full py-3 rounded-xl border border-emerald-500/30 bg-emerald-600/15 text-emerald-400 font-black uppercase tracking-widest text-xs lg:text-sm text-center">
+                              Already Applied
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {isOwner && project.status !== 'closed' && (
+                        <button
+                          onClick={() => navigate(`/dashboard/projects/edit/${project._id}`)}
+                          className="w-full py-2 bg-[#F24C20] hover:bg-orange-600 text-white rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all shadow-xl shadow-[#F24C20]/20 flex items-center justify-center gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Edit Project
+                        </button>
+                      )}
+                      
+                      <div className="relative group/share">
+                        <button
+                          onClick={() => setShowShareModal(!showShareModal)}
+                          className={`w-full py-2 rounded-xl font-black uppercase tracking-widest text-xs lg:text-sm transition-all flex items-center justify-center gap-2 ${isDarkMode ? 'bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-[#2b160e]' : 'bg-[#fff7ef] hover:bg-[#F24C20] border border-[#f2d7c2] text-[#2b160e]'}`}
+                        >
+                          <Share2 className="w-4 h-4" /> Share
+                        </button>
+                        <AnimatePresence>
+                          {showShareModal && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                              className="absolute bottom-full mb-3 left-0 right-0 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-2 z-50 ring-1 ring-white/10"
+                            >
+                              <div className="flex flex-col gap-1">
+                                <button onClick={() => handleShare('whatsapp')} className="flex items-center justify-between gap-3 p-3 hover:bg-emerald-500/10 rounded-xl transition-all group">
+                                  <span className="text-[10px] lg:text-xs font-black uppercase tracking-widest text-neutral-400 group-hover:text-emerald-400">WhatsApp</span>
+                                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 text-emerald-500 group-hover:text-white transition-all">
+                                    <MessageCircle className="w-4 h-4" />
+                                  </div>
+                                </button>
+                                <button onClick={() => handleShare('email')} className="flex items-center justify-between gap-3 p-3 hover:bg-[#F24C20]/10 rounded-xl transition-all group">
+                                  <span className="text-[10px] lg:text-xs font-black uppercase tracking-widest text-neutral-400 group-hover:text-[#F24C20]">Email</span>
+                                  <div className="w-8 h-8 rounded-lg bg-[#F24C20]/10 flex items-center justify-center group-hover:bg-[#F24C20] text-[#F24C20] group-hover:text-white transition-all">
+                                    <Mail className="w-4 h-4" />
+                                  </div>
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Client Profile Card */}
+                  {!isOwner && (
+                    <div className={`p-6 lg:p-8 rounded-2xl relative overflow-hidden ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+                      <h3 className={`text-[10px] lg:text-sm font-black uppercase tracking-[0.2em] mb-6 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>About the Client</h3>
+                      {project.client_id ? (
+                        <>
+                          <div className="flex items-center gap-4 mb-6">
+                            <ImageWithFallback
+                              src={project.client_id?.profile_image ? (project.client_id.profile_image.startsWith('http') ? project.client_id.profile_image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${project.client_id.profile_image}`) : `https://ui-avatars.com/api/?name=${project.client_id?.full_name}`}
+                              alt={project.client_id?.full_name}
+                              className="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover border-2 border-neutral-800"
+                            />
+                            <div className="min-w-0">
+                              <h4 className={`font-black text-sm lg:text-lg truncate hover:text-[#F24C20] transition-colors cursor-pointer ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                                {project.client_id?.full_name}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <MapPin className="w-3 h-3 text-[#F24C20]" />
+                                <span className={`text-[10px] lg:text-xs font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>{project.location || 'India'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-black/20 border border-neutral-800' : 'bg-[#fff7ef] border border-[#f2d7c2]'}`}>
+                              <div className={`text-[8px] lg:text-[10px] font-black uppercase tracking-widest mb-1 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>Rating</div>
+                              <div className={`flex items-center gap-1 font-black text-xs lg:text-base ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> 4.8
+                              </div>
+                            </div>
+                            <div className="p-3 bg-green-500/5 rounded-xl border border-green-500/20 flex flex-col justify-center">
+                              <div className="flex items-center gap-1 text-green-400">
+                                <Shield className="w-3 h-3" />
+                                <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest leading-none">Verified</span>
+                              </div>
+                            </div>
+                          </div>
+                          {!canSeeFullDetails && (
+                            <button onClick={() => setShowUnlockModal(true)} className="w-full py-2 bg-[#F24C20]/10 text-[#F24C20] text-[10px] lg:text-xs font-black uppercase tracking-widest rounded-lg border border-[#F24C20]/20 hover:bg-[#F24C20] hover:text-white transition-all flex items-center justify-center gap-2 mb-4">
+                              <Lock className="w-3 h-3" /> Unlock Profile
+                            </button>
+                          )}
+                          <div className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-neutral-500 opacity-60' : 'text-[#8b6b5a]'}`}>
+                            Member since {new Date(project.client_id?.createdAt || project.createdAt).getFullYear()}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-6">
+                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-black/40 border border-neutral-800 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <Lock className="w-6 h-6 text-neutral-500" />
+                          </div>
+                          <p className="text-[10px] lg:text-sm text-neutral-500 font-medium px-4 leading-relaxed mb-4 text-center">Identity hidden. Express interest to view full profile.</p>
+                          <button onClick={() => setShowUnlockModal(true)} className="text-[#F24C20] font-black text-[12px] uppercase tracking-widest hover:underline">Unlock Now</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Project Activity */}
+                  <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+                    <h3 className={`text-[10px] lg:text-sm font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Project Activity</h3>
+                    <div className="space-y-4 font-bold">
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center gap-3 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>
+                          <FileText className="w-4 h-4" />
+                          <span className="text-xs lg:text-sm">Proposals</span>
+                        </div>
+                        <span className={`text-xs lg:text-base ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                          {project.stats?.proposals || project.proposals || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center gap-3 ${isDarkMode ? 'text-neutral-500' : 'text-[#7a5a49]'}`}>
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="text-xs lg:text-sm">Conversations</span>
+                        </div>
+                        <span className={`text-xs lg:text-base ${isDarkMode ? 'text-white' : 'text-[#1f120d]'}`}>
+                          {project.stats?.interviewing || 0}
+                        </span>
+                      </div>
+                      <div className={`pt-4 flex items-center justify-between text-[12px] uppercase font-black ${isDarkMode ? 'border-t border-neutral-800 text-neutral-600' : 'border-t border-[#f2d7c2] text-[#8b6b5a]'}`}>
+                        <span>Last Updated</span>
+                        <span>{project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'Today'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Questions */}
+                  <div className={`p-6 lg:p-8 rounded-2xl ${isDarkMode ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-[#f2d7c2] shadow-sm'}`}>
+                    <h3 className={`text-[12px] lg:text-sm font-black uppercase tracking-widest mb-6 pb-4 ${isDarkMode ? 'text-neutral-500 border-b border-neutral-800' : 'text-[#7a5a49] border-b border-[#f2d7c2]'}`}>Quick Questions</h3>
+                    <div className="space-y-4">
+                      <details className="group">
+                        <summary className={`flex items-center justify-between cursor-pointer text-sm lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                          Is this fixed or hourly?
+                          <span className="text-[#F24C20] group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <p className={`mt-3 text-[11px] lg:text-xs leading-relaxed font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#6f5548]'}`}>This is a {project.budget_range ? 'Fixed/Negotiated' : 'N/A'} project. Payments are released upon milestone completion.</p>
+                      </details>
+                      <details className="group">
+                        <summary className={`flex items-center justify-between cursor-pointer text-sm lg:text-sm font-bold hover:text-[#F24C20] transition-colors ${isDarkMode ? 'text-neutral-300' : 'text-[#2b160e]'}`}>
+                          Can I submit a sample?
+                          <span className="text-[#F24C20] group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <p className={`mt-3 text-[11px] lg:text-xs leading-relaxed font-medium ${isDarkMode ? 'text-neutral-500' : 'text-[#6f5548]'}`}>Yes, you can include relevant portfolio samples or case studies in your proposal message.</p>
+                      </details>
+                    </div>
+                  </div>
+                </>
+              )}
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Apply Modal */}
+      {showApplyCreditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-2xl shadow-black/40"
+          >
+            <h3 className="text-xl font-bold text-white mb-4 text-center">Apply to Project</h3>
+            <div className="rounded-2xl border border-neutral-700 bg-neutral-800/60 p-4 space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-300">Using</span>
+                <span className="text-white font-bold">{applicationPointCost}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-300">Available</span>
+                <span className="text-white font-bold">{remainingProjectApplications}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-300">Left</span>
+                <span className="text-white font-bold">{Math.max(remainingProjectApplications - applicationPointCost, 0)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 mt-5">
+              <button
+                onClick={() => {
+                  setShowApplyCreditModal(false);
+                  setShowApplyModal(true);
+                }}
+                disabled={remainingProjectApplications < applicationPointCost}
+                className="w-full px-4 py-3 bg-[#044071] hover:bg-[#055a99] text-white rounded-xl font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                Continue
+              </button>
+              <button
+                onClick={() => setShowApplyCreditModal(false)}
+                className="w-full px-4 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {showApplyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-2xl p-8 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Submit Proposal</h2>
+              <button
+                onClick={() => setShowApplyModal(false)}
+                className="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+              <div className="space-y-6">
+              <div className="rounded-lg border border-[#F24C20]/30 bg-[#F24C20]/10 p-4">
+                <p className="text-sm text-white font-semibold">Project Applications</p>
+                <p className="text-xs text-neutral-300 mt-1">Debit on apply: <span className="text-white font-bold">{applicationPointCost} application</span></p>
+                <p className="text-xs text-neutral-300 mt-1">Your remaining applications: <span className="text-white font-bold">{remainingProjectApplications}</span></p>
+                <p className="text-xs mt-1">
+                  {remainingProjectApplications >= applicationPointCost ? (
+                    <span className="text-green-400 font-semibold">Eligible to apply</span>
+                  ) : (
+                    <span className="text-red-400 font-semibold">Not eligible. Please upgrade to get more applications.</span>
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Cover Letter
+                </label>
+                <textarea
+                  rows={6}
+                  maxLength={PROPOSAL_LIMITS.coverLetterMax}
+                  value={proposal.coverLetter}
+                  onChange={(e) => setProposal({ ...proposal, coverLetter: e.target.value })}
+                  placeholder="Introduce yourself and explain why you're the best fit for this project..."
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#F24C20] transition-colors"
+                />
+                <p className="mt-2 text-xs text-neutral-500">{proposal.coverLetter.trim().length}/{PROPOSAL_LIMITS.coverLetterMax} characters</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Your Bid Amount
+                  </label>
+                  <input
+                    type="number"
+                    min={PROPOSAL_LIMITS.bidAmountMin}
+                    max={PROPOSAL_LIMITS.bidAmountMax}
+                    value={proposal.bidAmount}
+                    onChange={(e) => setProposal({ ...proposal, bidAmount: e.target.value })}
+                    placeholder="₹5,000"
+                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#F24C20] transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Delivery Time (Weeks)
+                  </label>
+                  <input
+                    type="number"
+                    min={PROPOSAL_LIMITS.deliveryWeeksMin}
+                    max={PROPOSAL_LIMITS.deliveryWeeksMax}
+                    value={proposal.deliveryTime}
+                    onChange={(e) => setProposal({ ...proposal, deliveryTime: e.target.value })}
+                    placeholder="6"
+                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#F24C20] transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Portfolio Link (Optional)
+                </label>
+                <input
+                  type="url"
+                  maxLength={PROPOSAL_LIMITS.portfolioLinkMax}
+                  value={proposal.portfolioLink}
+                  onChange={(e) => setProposal({ ...proposal, portfolioLink: e.target.value })}
+                  placeholder="https://yourportfolio.com"
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#F24C20] transition-colors"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowApplyModal(false)}
+                  className="flex-1 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApply}
+                  disabled={remainingProjectApplications < applicationPointCost}
+                  className="flex-1 px-6 py-3 bg-[#044071] hover:bg-[#055a99] text-white rounded-lg font-medium transition-colors shadow-lg shadow-[#044071]/30"
+                >
+                  Submit Proposal
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      <CreditUnlockModal
+        isOpen={showUnlockModal}
+        onClose={() => setShowUnlockModal(false)}
+        targetId={id!}
+        targetType="project"
+        onUnlocked={() => setIsUnlocked(true)}
+      />
+    </div>
+  );
+}
